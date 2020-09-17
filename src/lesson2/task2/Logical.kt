@@ -61,7 +61,9 @@ fun circleInside(
  */
 fun brickPasses(a: Int, b: Int, c: Int, r: Int, s: Int): Boolean {
     return when {
-        (((a * b) <= (r * s)) || ((b * c) <= (r * s)) || ((a * c) <= (r * s))) -> true
+        (((a <= r) && (b <= s)) || ((a <= s) && (b <= r))) -> true
+        (((a <= r) && (c <= s)) || ((a <= s) && (c <= r))) -> true
+        (((c <= r) && (b <= s)) || ((c <= s) && (b <= r))) -> true
         else -> false
     }
 }
