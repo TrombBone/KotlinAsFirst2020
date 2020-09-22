@@ -2,6 +2,8 @@
 
 package lesson3.task1
 
+import lesson1.task1.sqr
+import kotlin.math.pow
 import kotlin.math.sqrt
 
 // Урок 3: циклы
@@ -80,7 +82,13 @@ fun digitNumber(n: Int): Int = TODO()
  * Найти число Фибоначчи из ряда 1, 1, 2, 3, 5, 8, 13, 21, ... с номером n.
  * Ряд Фибоначчи определён следующим образом: fib(1) = 1, fib(2) = 1, fib(n+2) = fib(n) + fib(n+1)
  */
-fun fib(n: Int): Int = TODO()
+fun fib(n: Int): Int =
+    when (n) {
+        1 -> 1
+        2 -> 1
+        else -> fib(n - 1) + fib(n - 2)
+    }
+
 
 /**
  * Простая (2 балла)
@@ -196,12 +204,34 @@ fun cos(x: Double, eps: Double): Double = TODO()
  * Сложная (4 балла)
  *
  * Найти n-ю цифру последовательности из квадратов целых чисел:
- * 149162536496481100121144...
+ * 1491625364964811001(2)1144...
  * Например, 2-я цифра равна 4, 7-я 5, 12-я 6.
  *
  * Использовать операции со строками в этой задаче запрещается.
  */
-fun squareSequenceDigit(n: Int): Int = TODO()
+fun squareSequenceDigit(n: Int): Int {
+    var countAll = 0
+    var countLastSqr: Int
+    var lastNum = 0
+    val result: Double
+    while (countAll < n) {
+        lastNum++
+        countLastSqr = 0
+        var thisNum: Int = sqr(lastNum)
+        while (thisNum > 0) {
+            thisNum /= 10
+            countLastSqr++
+        }
+        countAll += countLastSqr
+    }
+    result = if (countAll == n) {
+        (sqr(lastNum) % 10).toDouble()
+    } else {
+        (sqr(lastNum) / 10.0.pow(countAll - n)) % 10
+    }
+    return result.toInt()
+}
+
 
 /**
  * Сложная (5 баллов)
@@ -212,4 +242,25 @@ fun squareSequenceDigit(n: Int): Int = TODO()
  *
  * Использовать операции со строками в этой задаче запрещается.
  */
-fun fibSequenceDigit(n: Int): Int = TODO()
+fun fibSequenceDigit(n: Int): Int {
+    var countAll = 0
+    var countLastFib: Int
+    var lastNum = 0
+    val result: Double
+    while (countAll < n) {
+        lastNum++
+        countLastFib = 0
+        var thisNum: Int = fib(lastNum)
+        while (thisNum > 0) {
+            thisNum /= 10
+            countLastFib++
+        }
+        countAll += countLastFib
+    }
+    result = if (countAll == n) {
+        (fib(lastNum) % 10).toDouble()
+    } else {
+        (fib(lastNum) / 10.0.pow(countAll - n)) % 10
+    }
+    return result.toInt()
+}
