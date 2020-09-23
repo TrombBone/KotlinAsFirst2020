@@ -251,21 +251,17 @@ fun fibSequenceDigit(n: Int): Int {
     var countAll = 0
     var countLastFib: Int
     var lastNum = 0
-    val result: Double
+    val result: Int
     while (countAll < n) {
         lastNum++
         countLastFib = 0
-        var thisNum: Int = fib(lastNum)
+        var thisNum = fib(lastNum)
         while (thisNum > 0) {
             thisNum /= 10
             countLastFib++
         }
         countAll += countLastFib
     }
-    result = if (countAll == n) {
-        (fib(lastNum) % 10).toDouble()
-    } else {
-        (fib(lastNum) / 10.0.pow(countAll - n)) % 10
-    }
-    return result.toInt()
+    result = (fib(lastNum) / 10.0.pow(countAll - n) % 10).toInt()
+    return result
 }
