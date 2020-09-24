@@ -225,13 +225,10 @@ fun cos(x: Double, eps: Double): Double = TODO()
  */
 fun squareSequenceDigit(n: Int): Int {
     var countAll = 0
-    var countLastSqr: Int
     var lastNum = 0
     while (countAll < n) {
         lastNum++
-        val thisNum = sqr(lastNum)
-        countLastSqr = digitNumber(thisNum)
-        countAll += countLastSqr
+        countAll += digitNumber(sqr(lastNum))
     }
     return (sqr(lastNum) / 10.0.pow(countAll - n) % 10).toInt()
 }
@@ -248,13 +245,10 @@ fun squareSequenceDigit(n: Int): Int {
  */
 fun fibSequenceDigit(n: Int): Int {
     var countAll = 0
-    var countLastFib: Int
     var lastNum = 0
     while (countAll < n) {
         lastNum++
-        val thisNum = fib(lastNum)
-        countLastFib = digitNumber(thisNum)
-        countAll += countLastFib
+        countAll += digitNumber(fib(lastNum))
     }
     return (fib(lastNum) / 10.0.pow(countAll - n) % 10).toInt()
 }
