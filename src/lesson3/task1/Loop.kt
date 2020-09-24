@@ -81,7 +81,7 @@ fun digitNumber(n: Int): Int {
         n2 /= 10
         count++
     }
-    if (n == 0) count = 1
+    if (n == 0) return 1
     return count
 }
 
@@ -227,15 +227,13 @@ fun squareSequenceDigit(n: Int): Int {
     var countAll = 0
     var countLastSqr: Int
     var lastNum = 0
-    val result: Int
     while (countAll < n) {
         lastNum++
         val thisNum = sqr(lastNum)
         countLastSqr = digitNumber(thisNum)
         countAll += countLastSqr
     }
-    result = (sqr(lastNum) / 10.0.pow(countAll - n) % 10).toInt()
-    return result
+    return (sqr(lastNum) / 10.0.pow(countAll - n) % 10).toInt()
 }
 
 
@@ -252,13 +250,11 @@ fun fibSequenceDigit(n: Int): Int {
     var countAll = 0
     var countLastFib: Int
     var lastNum = 0
-    val result: Int
     while (countAll < n) {
         lastNum++
         val thisNum = fib(lastNum)
         countLastFib = digitNumber(thisNum)
         countAll += countLastFib
     }
-    result = (fib(lastNum) / 10.0.pow(countAll - n) % 10).toInt()
-    return result
+    return (fib(lastNum) / 10.0.pow(countAll - n) % 10).toInt()
 }
