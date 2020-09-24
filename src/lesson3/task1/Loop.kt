@@ -74,7 +74,16 @@ fun digitCountInNumber(n: Int, m: Int): Int =
  *
  * Использовать операции со строками в этой задаче запрещается.
  */
-fun digitNumber(n: Int): Int = TODO()
+fun digitNumber(n: Int): Int {
+    var count = 0
+    var n2 = n
+    while (n2 > 0) {
+        n2 /= 10
+        count++
+    }
+    if (n == 0) count = 1
+    return count
+}
 
 /**
  * Простая (2 балла)
@@ -218,23 +227,15 @@ fun squareSequenceDigit(n: Int): Int {
     var countAll = 0
     var countLastSqr: Int
     var lastNum = 0
-    val result: Double
+    val result: Int
     while (countAll < n) {
         lastNum++
-        countLastSqr = 0
-        var thisNum: Int = sqr(lastNum)
-        while (thisNum > 0) {
-            thisNum /= 10
-            countLastSqr++
-        }
+        val thisNum = sqr(lastNum)
+        countLastSqr = digitNumber(thisNum)
         countAll += countLastSqr
     }
-    result = if (countAll == n) {
-        (sqr(lastNum) % 10).toDouble()
-    } else {
-        (sqr(lastNum) / 10.0.pow(countAll - n)) % 10
-    }
-    return result.toInt()
+    result = (sqr(lastNum) / 10.0.pow(countAll - n) % 10).toInt()
+    return result
 }
 
 
@@ -254,12 +255,8 @@ fun fibSequenceDigit(n: Int): Int {
     val result: Int
     while (countAll < n) {
         lastNum++
-        countLastFib = 0
-        var thisNum = fib(lastNum)
-        while (thisNum > 0) {
-            thisNum /= 10
-            countLastFib++
-        }
+        val thisNum = fib(lastNum)
+        countLastFib = digitNumber(thisNum)
         countAll += countLastFib
     }
     result = (fib(lastNum) / 10.0.pow(countAll - n) % 10).toInt()
