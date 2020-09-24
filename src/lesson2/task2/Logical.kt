@@ -60,6 +60,6 @@ fun circleInside(
  * Вернуть true, если кирпич пройдёт
  */
 fun brickPasses(a: Int, b: Int, c: Int, r: Int, s: Int): Boolean =
-    ((a <= r && b <= s) || (a <= s && b <= r)) ||
-            ((a <= r && c <= s) || (a <= s && c <= r)) ||
-            ((c <= r && b <= s) || (c <= s && b <= r))
+    (a <= r && b <= s) || (a <= s && b <= r) ||
+            (a <= r && c <= s) || (a <= s && c <= r) ||
+            (c <= r && b <= s) || (c <= s && b <= r)
