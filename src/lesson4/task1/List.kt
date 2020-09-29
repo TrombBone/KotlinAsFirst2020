@@ -3,6 +3,8 @@
 package lesson4.task1
 
 import lesson1.task1.discriminant
+import lesson3.task1.digitNumber
+import kotlin.math.pow
 import kotlin.math.sqrt
 
 // Урок 4: списки
@@ -241,7 +243,48 @@ fun decimalFromString(str: String, base: Int): Int = TODO()
  * 90 = XC, 100 = C, 400 = CD, 500 = D, 900 = CM, 1000 = M.
  * Например: 23 = XXIII, 44 = XLIV, 100 = C
  */
-fun roman(n: Int): String = TODO()
+fun roman(n: Int): String {
+    var result = ""
+    for (i in digitNumber(n) downTo 1) {
+        when (((n / 10.0.pow(digitNumber(n) - i)).toInt() % 10 * 10.0.pow(digitNumber(n) - i)).toInt()) {
+            1 -> result += 'I'
+            2 -> result += "II"
+            3 -> result += "III"
+            4 -> result += "IV"
+            5 -> result += "V"
+            6 -> result += "VI"
+            7 -> result += "VII"
+            8 -> result += "VIII"
+            9 -> result += "IX"
+            10 -> result = "X$result"
+            20 -> result = "XX$result"
+            30 -> result = "XXX$result"
+            40 -> result = "XL$result"
+            50 -> result = "L$result"
+            60 -> result = "LX$result"
+            70 -> result = "LXX$result"
+            80 -> result = "LXXX$result"
+            90 -> result = "XC$result"
+            100 -> result = "C$result"
+            200 -> result = "CC$result"
+            300 -> result = "CCC$result"
+            400 -> result = "CD$result"
+            500 -> result = "D$result"
+            600 -> result = "DC$result"
+            700 -> result = "DCC$result"
+            800 -> result = "DCCC$result"
+            900 -> result = "CM$result"
+            1000 -> result = "M$result"
+            2000 -> result = "MM$result"
+            3000 -> result = "MMM$result"
+            /*
+            4000 -> result = "M?$result"
+            5000 -> result = "?$result"
+            */
+        }
+    }
+    return result
+}
 
 /**
  * Очень сложная (7 баллов)
@@ -250,4 +293,58 @@ fun roman(n: Int): String = TODO()
  * Например, 375 = "триста семьдесят пять",
  * 23964 = "двадцать три тысячи девятьсот шестьдесят четыре"
  */
-fun russian(n: Int): String = TODO()
+fun russian(n: Int): String {
+    var result = ""
+    for (i in digitNumber(n) downTo 1) {
+        var isThousand = ((n / 10.0.pow(digitNumber(n) - i)).toInt() % 10 * 10.0.pow(digitNumber(n) - i)).toInt()
+        var textThousand = ""
+        if (digitNumber(n) - i == 3) textThousand = "тысяч "
+        if (digitNumber(n) - i >= 3) isThousand /= 1000
+        when (isThousand) {
+            0 -> result = "$textThousand$result"
+            1 -> result = "один $textThousand$result"
+            2 -> result = "два $textThousand$result"
+            3 -> result = "три $textThousand$result"
+            4 -> result = "четыре $textThousand$result"
+            5 -> result = "пять $textThousand$result"
+            6 -> result = "шесть $textThousand$result"
+            7 -> result = "семь $textThousand$result"
+            8 -> result = "восемь $textThousand$result"
+            9 -> result = "девять $textThousand$result"
+            10 -> result = "десять $textThousand$result"
+            20 -> result = "двадцать $textThousand$result"
+            30 -> result = "тридцать $textThousand$result"
+            40 -> result = "сорок $textThousand$result"
+            50 -> result = "пятьдесят $textThousand$result"
+            60 -> result = "шестьдесят $textThousand$result"
+            70 -> result = "семьдесят $textThousand$result"
+            80 -> result = "восемьдесят $textThousand$result"
+            90 -> result = "девяносто $textThousand$result"
+            100 -> result = "сто $textThousand$result"
+            200 -> result = "двести $textThousand$result"
+            300 -> result = "триста $textThousand$result"
+            400 -> result = "четыреста $textThousand$result"
+            500 -> result = "пятьсот $textThousand$result"
+            600 -> result = "шестьсот $textThousand$result"
+            700 -> result = "семьсот $textThousand$result"
+            800 -> result = "восемьсот $textThousand$result"
+            900 -> result = "девятьсот $textThousand$result"
+        }
+    }
+    when {
+        "десять один" in result -> result = result.replace("десять один", "одинадцать")
+        "десять два" in result -> result = result.replace("десять два", "двенадцать")
+        "десять три" in result -> result = result.replace("десять три", "тринадцать")
+        "десять четыре" in result -> result = result.replace("десять четыре", "четырнадцать")
+        "десять пять" in result -> result = result.replace("десять пять", "пятнадцать")
+        "десять шесть" in result -> result = result.replace("десять шесть", "шестнадцать")
+        "десять семь" in result -> result = result.replace("десять семь", "семнадцать")
+        "десять восемь" in result -> result = result.replace("десять восемь", "восемнадцать")
+        "десять девять" in result -> result = result.replace("десять девять", "девятнадцать")
+        "один тысяч" in result -> result = result.replace("один тысяч", "одна тысяча")
+        "два тысяч" in result -> result = result.replace("два тысяч", "две тысячи")
+        "три тысяч" in result -> result = result.replace("три тысяч", "три тысячи")
+        "четыре тысяч" in result -> result = result.replace("четыре тысяч", "четыре тысячи")
+    }
+    return result.trim()
+}
