@@ -331,20 +331,18 @@ fun russian(n: Int): String {
             900 -> result = "девятьсот $textThousand$result"
         }
     }
-    when {
-        "десять один" in result -> result = result.replace("десять один", "одинадцать")
-        "десять два" in result -> result = result.replace("десять два", "двенадцать")
-        "десять три" in result -> result = result.replace("десять три", "тринадцать")
-        "десять четыре" in result -> result = result.replace("десять четыре", "четырнадцать")
-        "десять пять" in result -> result = result.replace("десять пять", "пятнадцать")
-        "десять шесть" in result -> result = result.replace("десять шесть", "шестнадцать")
-        "десять семь" in result -> result = result.replace("десять семь", "семнадцать")
-        "десять восемь" in result -> result = result.replace("десять восемь", "восемнадцать")
-        "десять девять" in result -> result = result.replace("десять девять", "девятнадцать")
-        "один тысяч" in result -> result = result.replace("один тысяч", "одна тысяча")
-        "два тысяч" in result -> result = result.replace("два тысяч", "две тысячи")
-        "три тысяч" in result -> result = result.replace("три тысяч", "три тысячи")
-        "четыре тысяч" in result -> result = result.replace("четыре тысяч", "четыре тысячи")
-    }
+    result = result.replace("десять один", "одиннадцать")
+    result = result.replace("десять два", "двенадцать")
+    result = result.replace("десять три", "тринадцать")
+    result = result.replace("десять четыре", "четырнадцать")
+    result = result.replace("десять пять", "пятнадцать")
+    result = result.replace("десять шесть", "шестнадцать")
+    result = result.replace("десять семь", "семнадцать")
+    result = result.replace("десять восемь", "восемнадцать")
+    result = result.replace("десять девять", "девятнадцать")
+    result = result.replace("один тысяч", "одна тысяча")
+    result = result.replace("два тысяч", "две тысячи")
+    result = result.replace("три тысяч", "три тысячи")
+    result = result.replace("четыре тысяч", "четыре тысячи")
     return result.trim()
 }
