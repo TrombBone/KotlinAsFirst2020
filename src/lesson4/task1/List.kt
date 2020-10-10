@@ -244,43 +244,29 @@ fun decimalFromString(str: String, base: Int): Int = TODO()
  * Например: 23 = XXIII, 44 = XLIV, 100 = C
  */
 fun roman(n: Int): String {
+    val alphabet = listOf("", "I", "X", "C", "M", "V", "L", "D")
     var result = ""
     for (i in digitNumber(n) downTo 1) {
-        when (((n / 10.0.pow(digitNumber(n) - i)).toInt() % 10 * 10.0.pow(digitNumber(n) - i)).toInt()) {
-            1 -> result += 'I'
-            2 -> result += "II"
-            3 -> result += "III"
-            4 -> result += "IV"
-            5 -> result += "V"
-            6 -> result += "VI"
-            7 -> result += "VII"
-            8 -> result += "VIII"
-            9 -> result += "IX"
-            10 -> result = "X$result"
-            20 -> result = "XX$result"
-            30 -> result = "XXX$result"
-            40 -> result = "XL$result"
-            50 -> result = "L$result"
-            60 -> result = "LX$result"
-            70 -> result = "LXX$result"
-            80 -> result = "LXXX$result"
-            90 -> result = "XC$result"
-            100 -> result = "C$result"
-            200 -> result = "CC$result"
-            300 -> result = "CCC$result"
-            400 -> result = "CD$result"
-            500 -> result = "D$result"
-            600 -> result = "DC$result"
-            700 -> result = "DCC$result"
-            800 -> result = "DCCC$result"
-            900 -> result = "CM$result"
-            1000 -> result = "M$result"
-            2000 -> result = "MM$result"
-            3000 -> result = "MMM$result"
-            /*
-            4000 -> result = "M?$result"
-            5000 -> result = "?$result"
-            */
+        val place = ((n / 10.0.pow(digitNumber(n) - i)).toInt() % 10 * 10.0.pow(digitNumber(n) - i)).toInt()
+        val significantDigit = place / 10.0.pow(digitNumber(n) - i).toInt()
+        if (significantDigit < 5) {
+            var helpResult = ""
+            if (significantDigit < 4) (0 until significantDigit).forEach { _ ->
+                helpResult = alphabet[digitNumber(place)] + helpResult
+            } else {
+                result = alphabet[digitNumber(place)] + alphabet[digitNumber(place) + 4] + result
+            }
+            result = helpResult + result
+        } else {
+            var helpResult = ""
+            if (significantDigit < 9) {
+                (0..significantDigit - 6).forEach { _ ->
+                    helpResult = alphabet[digitNumber(place)] + helpResult
+                }
+                result = alphabet[digitNumber(place) + 4] + helpResult + result
+            } else {
+                result = alphabet[digitNumber(place)] + alphabet[digitNumber(place) + 1] + result
+            }
         }
     }
     return result
@@ -294,13 +280,23 @@ fun roman(n: Int): String {
  * 23964 = "двадцать три тысячи девятьсот шестьдесят четыре"
  */
 fun russian(n: Int): String {
+    /*
+    !!!
+    Единственное, как можно переделать эту задачу - это добавить все строки в список и, вместо прибавления напрямую,
+    брать строки из списка(списков). От этого задача не станет короче или эффективнее.
+    !!!
+    val units = listOf("", "один", "два", "три", "четыре", "пять", "шесть", "семь", "восемь", "девять")
+    val preTens = listOf("десять", "одиннадцать", "двенадцать", "тринадцать", "четырнадцать", "пятнадцать", "шестнадцать", "семнадцать", "восемнадцать", "девятнадцать")
+    val tens = listOf("", "", "двадцать", "тридцать", "сорок", "пятьдесят", "шестьдесят", "семьдесят", "восемьдесят", "девяносто")
+    val hundreds = listOf("", "сто", "двести", "триста", "четыреста", "пятьсот", "шестьсот", "семьсот", "восемьсот", "девятьсот")
+     */
     var result = ""
     for (i in digitNumber(n) downTo 1) {
-        var isThousand = ((n / 10.0.pow(digitNumber(n) - i)).toInt() % 10 * 10.0.pow(digitNumber(n) - i)).toInt()
+        var place = ((n / 10.0.pow(digitNumber(n) - i)).toInt() % 10 * 10.0.pow(digitNumber(n) - i)).toInt()
         var textThousand = ""
         if (digitNumber(n) - i == 3) textThousand = "тысяч "
-        if (digitNumber(n) - i >= 3) isThousand /= 1000
-        when (isThousand) {
+        if (digitNumber(n) - i >= 3) place /= 1000
+        when (place) {
             0 -> result = "$textThousand$result"
             1 -> result = "один $textThousand$result"
             2 -> result = "два $textThousand$result"
