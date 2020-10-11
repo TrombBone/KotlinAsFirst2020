@@ -4,7 +4,6 @@ package lesson4.task1
 
 import lesson1.task1.discriminant
 import lesson3.task1.digitNumber
-import kotlin.math.pow
 import kotlin.math.sqrt
 
 // Урок 4: списки
@@ -246,28 +245,17 @@ fun decimalFromString(str: String, base: Int): Int = TODO()
 fun roman(n: Int): String {
     val alphabet = listOf("", "I", "X", "C", "M", "V", "L", "D")
     var result = ""
-    for (i in digitNumber(n) downTo 1) {
-        val place = ((n / 10.0.pow(digitNumber(n) - i)).toInt() % 10 * 10.0.pow(digitNumber(n) - i)).toInt()
-        val significantDigit = place / 10.0.pow(digitNumber(n) - i).toInt()
-        if (significantDigit < 5) {
-            var helpResult = ""
-            if (significantDigit < 4) (0 until significantDigit).forEach { _ ->
-                helpResult = alphabet[digitNumber(place)] + helpResult
-            } else {
-                result = alphabet[digitNumber(place)] + alphabet[digitNumber(place) + 4] + result
-            }
-            result = helpResult + result
+    var n2 = n
+    for (i in 1..digitNumber(n)) {
+        val significantDigit = n2 % 10
+        result = if (significantDigit < 5) {
+            if (significantDigit < 4) alphabet[i].repeat(significantDigit) + result
+            else alphabet[i] + alphabet[i + 4] + result
         } else {
-            var helpResult = ""
-            if (significantDigit < 9) {
-                (0..significantDigit - 6).forEach { _ ->
-                    helpResult = alphabet[digitNumber(place)] + helpResult
-                }
-                result = alphabet[digitNumber(place) + 4] + helpResult + result
-            } else {
-                result = alphabet[digitNumber(place)] + alphabet[digitNumber(place) + 1] + result
-            }
+            if (significantDigit < 9) alphabet[i + 4] + alphabet[i].repeat(significantDigit - 5) + result
+            else alphabet[i] + alphabet[i + 1] + result
         }
+        n2 /= 10
     }
     return result
 }
@@ -280,65 +268,25 @@ fun roman(n: Int): String {
  * 23964 = "двадцать три тысячи девятьсот шестьдесят четыре"
  */
 fun russian(n: Int): String {
-    /*
-    !!!
-    Единственное, как можно переделать эту задачу - это добавить все строки в список и, вместо прибавления напрямую,
-    брать строки из списка(списков). От этого задача не станет короче или эффективнее.
-    !!!
-    val units = listOf("", "один", "два", "три", "четыре", "пять", "шесть", "семь", "восемь", "девять")
-    val preTens = listOf("десять", "одиннадцать", "двенадцать", "тринадцать", "четырнадцать", "пятнадцать", "шестнадцать", "семнадцать", "восемнадцать", "девятнадцать")
-    val tens = listOf("", "", "двадцать", "тридцать", "сорок", "пятьдесят", "шестьдесят", "семьдесят", "восемьдесят", "девяносто")
-    val hundreds = listOf("", "сто", "двести", "триста", "четыреста", "пятьсот", "шестьсот", "семьсот", "восемьсот", "девятьсот")
-     */
+    val units = listOf("один ", "два ", "три ", "четыре ", "пять ", "шесть ", "семь ", "восемь ", "девять ")
+    val tens = listOf("десять ", "двадцать ", "тридцать ", "сорок ", "пятьдесят ", "шестьдесят ", "семьдесят ", "восемьдесят ", "девяносто ")
+    val hundreds = listOf("сто ", "двести ", "триста ", "четыреста ", "пятьсот ", "шестьсот ", "семьсот ", "восемьсот ", "девятьсот ")
     var result = ""
-    for (i in digitNumber(n) downTo 1) {
-        var place = ((n / 10.0.pow(digitNumber(n) - i)).toInt() % 10 * 10.0.pow(digitNumber(n) - i)).toInt()
-        var textThousand = ""
-        if (digitNumber(n) - i == 3) textThousand = "тысяч "
-        if (digitNumber(n) - i >= 3) place /= 1000
-        when (place) {
-            0 -> result = "$textThousand$result"
-            1 -> result = "один $textThousand$result"
-            2 -> result = "два $textThousand$result"
-            3 -> result = "три $textThousand$result"
-            4 -> result = "четыре $textThousand$result"
-            5 -> result = "пять $textThousand$result"
-            6 -> result = "шесть $textThousand$result"
-            7 -> result = "семь $textThousand$result"
-            8 -> result = "восемь $textThousand$result"
-            9 -> result = "девять $textThousand$result"
-            10 -> result = "десять $textThousand$result"
-            20 -> result = "двадцать $textThousand$result"
-            30 -> result = "тридцать $textThousand$result"
-            40 -> result = "сорок $textThousand$result"
-            50 -> result = "пятьдесят $textThousand$result"
-            60 -> result = "шестьдесят $textThousand$result"
-            70 -> result = "семьдесят $textThousand$result"
-            80 -> result = "восемьдесят $textThousand$result"
-            90 -> result = "девяносто $textThousand$result"
-            100 -> result = "сто $textThousand$result"
-            200 -> result = "двести $textThousand$result"
-            300 -> result = "триста $textThousand$result"
-            400 -> result = "четыреста $textThousand$result"
-            500 -> result = "пятьсот $textThousand$result"
-            600 -> result = "шестьсот $textThousand$result"
-            700 -> result = "семьсот $textThousand$result"
-            800 -> result = "восемьсот $textThousand$result"
-            900 -> result = "девятьсот $textThousand$result"
+    var n2 = n
+    for (i in 1..digitNumber(n)) {
+        val significantDigit = n2 % 10
+        val alphabet = mutableListOf("")
+        when (i) {
+            1, 4 -> alphabet += units
+            2, 5 -> alphabet += tens
+            3, 6 -> alphabet += hundreds
         }
+        if (i == 4) result = "тысяч $result"
+        result = alphabet[significantDigit] + result
+        n2 /= 10
     }
-    result = result.replace("десять один", "одиннадцать")
-    result = result.replace("десять два", "двенадцать")
-    result = result.replace("десять три", "тринадцать")
-    result = result.replace("десять четыре", "четырнадцать")
-    result = result.replace("десять пять", "пятнадцать")
-    result = result.replace("десять шесть", "шестнадцать")
-    result = result.replace("десять семь", "семнадцать")
-    result = result.replace("десять восемь", "восемнадцать")
-    result = result.replace("десять девять", "девятнадцать")
-    result = result.replace("один тысяч", "одна тысяча")
-    result = result.replace("два тысяч", "две тысячи")
-    result = result.replace("три тысяч", "три тысячи")
-    result = result.replace("четыре тысяч", "четыре тысячи")
+    val errorCase = listOf("десять один", "десять два", "десять три", "десять четыре", "десять пять", "десять шесть", "десять семь", "десять восемь", "десять девять", "один тысяч", "два тысяч", "три тысяч", "четыре тысяч")
+    val correctCase = listOf("одиннадцать", "двенадцать", "тринадцать", "четырнадцать", "пятнадцать", "шестнадцать", "семнадцать", "восемнадцать", "девятнадцать", "одна тысяча", "две тысячи", "три тысячи", "четыре тысячи")
+    for (j in errorCase.indices) if (errorCase[j] in result) result = result.replace(errorCase[j], correctCase[j])
     return result.trim()
 }
