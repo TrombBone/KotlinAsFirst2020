@@ -277,7 +277,15 @@ fun propagateHandshakes(friends: Map<String, Set<String>>): Map<String, Set<Stri
  *   findSumOfTwo(listOf(1, 2, 3), 4) -> Pair(0, 2)
  *   findSumOfTwo(listOf(1, 2, 3), 6) -> Pair(-1, -1)
  */
-fun findSumOfTwo(list: List<Int>, number: Int): Pair<Int, Int> = TODO()
+fun findSumOfTwo(list: List<Int>, number: Int): Pair<Int, Int> {
+    //val listM = list.associateBy({ list.indices }, { it })
+    var res = Pair(-1, -1)
+    for (i in list.indices) if ((number - list[i]) in list && list.indexOf(number - list[i]) != i) {
+        res = Pair(i, list.indexOf(number - list[i]))
+        break
+    }
+    return res
+}
 
 /**
  * Очень сложная (8 баллов)
@@ -300,4 +308,15 @@ fun findSumOfTwo(list: List<Int>, number: Int): Pair<Int, Int> = TODO()
  *     450
  *   ) -> emptySet()
  */
-fun bagPacking(treasures: Map<String, Pair<Int, Int>>, capacity: Int): Set<String> = TODO()
+fun bagPacking(treasures: Map<String, Pair<Int, Int>>, capacity: Int): Set<String> {
+    val treasuresFit = mutableMapOf<Int, String>()
+    val res = mutableSetOf<String>()
+    for ((key, value) in treasures) if (value.first <= capacity) treasuresFit += (value.second / value.first to key)
+    var engagedCapacity = 0
+    for ((_, value) in treasuresFit.toSortedMap(reverseOrder())) {
+        engagedCapacity += treasures.getValue(value).first
+        if (engagedCapacity > capacity) break
+        res += value
+    }
+    return res
+}
