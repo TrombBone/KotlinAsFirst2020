@@ -2,6 +2,8 @@
 
 package lesson5.task1
 
+import kotlin.math.pow
+
 // Урок 5: ассоциативные массивы и множества
 // Максимальное количество баллов = 14
 // Рекомендуемое количество баллов = 9
@@ -311,14 +313,17 @@ fun findSumOfTwo(list: List<Int>, number: Int): Pair<Int, Int> {
 fun bagPacking(treasures: Map<String, Pair<Int, Int>>, capacity: Int): Set<String> {
     val treasuresFit = mutableMapOf<String, Double>()
     val res = mutableSetOf<String>()
-    for ((key, value) in treasures) if (value.first <= capacity) treasuresFit += (key to value.second.toDouble() / value.first.toDouble())
+    for ((key, value) in treasures) if (value.first <= capacity) treasuresFit += (key to value.second.toDouble().pow(2.0) / value.first.toDouble())
     val list = treasuresFit.values.sorted().reversed()
     val treasuresFitSort = mutableMapOf<String, Double>()
     for (element in list) treasuresFitSort += treasuresFit.filterValues { it == element }
     var engagedCapacity = 0
     for ((key, _) in treasuresFitSort) {
         engagedCapacity += treasures.getValue(key).first
-        if (engagedCapacity > capacity) break
+        if (engagedCapacity > capacity) {
+            engagedCapacity -= treasures.getValue(key).first
+            continue
+        }
         res += key
     }
     return res
