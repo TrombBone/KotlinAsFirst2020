@@ -312,19 +312,29 @@ fun findSumOfTwo(list: List<Int>, number: Int): Pair<Int, Int> {
  */
 fun bagPacking(treasures: Map<String, Pair<Int, Int>>, capacity: Int): Set<String> {
     val treasuresFit = mutableMapOf<String, Double>()
-    val res = mutableSetOf<String>()
+    var res = mutableSetOf<String>()
     for ((key, value) in treasures) if (value.first <= capacity) treasuresFit += (key to value.second.toDouble().pow(2.0) / value.first.toDouble())
     val list = treasuresFit.values.sorted().reversed()
     val treasuresFitSort = mutableMapOf<String, Double>()
     for (element in list) treasuresFitSort += treasuresFit.filterValues { it == element }
-    var engagedCapacity = 0
-    for ((key, _) in treasuresFitSort) {
-        engagedCapacity += treasures.getValue(key).first
-        if (engagedCapacity > capacity) {
-            engagedCapacity -= treasures.getValue(key).first
-            continue
+    var maxBenefit = 0
+    val deleteKey = treasuresFitSort.keys.toMutableList()
+    for (i in 0 until treasuresFitSort.size) {
+        var engagedCapacity = 0
+        val varRes = mutableMapOf<String, Int>()
+        for ((key, _) in treasuresFitSort) {
+            engagedCapacity += treasures.getValue(key).first
+            if (engagedCapacity > capacity) {
+                engagedCapacity -= treasures.getValue(key).first
+                continue
+            }
+            varRes += key to treasures.getValue(key).second
         }
-        res += key
+        if (varRes.values.sum() > maxBenefit) {
+            maxBenefit = varRes.values.sum()
+            res = varRes.keys
+        }
+        treasuresFitSort -= deleteKey[i]
     }
     return res
 }
