@@ -2,7 +2,7 @@
 
 package lesson5.task1
 
-import kotlin.math.pow
+import java.lang.Integer.max
 
 // Урок 5: ассоциативные массивы и множества
 // Максимальное количество баллов = 14
@@ -280,11 +280,12 @@ fun propagateHandshakes(friends: Map<String, Set<String>>): Map<String, Set<Stri
  *   findSumOfTwo(listOf(1, 2, 3), 6) -> Pair(-1, -1)
  */
 fun findSumOfTwo(list: List<Int>, number: Int): Pair<Int, Int> {
-    //val listM = list.associateBy({ list.indices }, { it })
+    val listM = mutableMapOf<Int, Int>()
+    for (i in list.indices) listM += (i to list[i])
     var res = Pair(-1, -1)
-    for (i in list.indices)
-        if ((number - list[i]) in list && list.indexOf(number - list[i]) != i) {
-            res = Pair(i, list.indexOf(number - list[i]))
+    for ((key, value) in listM)
+        if (listM.containsValue(number - value) && list.indexOf(number - value) != key) {
+            res = Pair(key, list.indexOf(number - value))
             break
         }
     return res
@@ -312,30 +313,30 @@ fun findSumOfTwo(list: List<Int>, number: Int): Pair<Int, Int> {
  *   ) -> emptySet()
  */
 fun bagPacking(treasures: Map<String, Pair<Int, Int>>, capacity: Int): Set<String> {
-    val treasuresFit = mutableMapOf<String, Double>()
-    var res = mutableSetOf<String>()
-    for ((key, value) in treasures) if (value.first <= capacity) treasuresFit += (key to value.second.toDouble().pow(2.0) / value.first.toDouble())
-    val list = treasuresFit.values.sorted().reversed()
-    val treasuresFitSort = mutableMapOf<String, Double>()
-    for (element in list) treasuresFitSort += treasuresFit.filterValues { it == element }
-    var maxBenefit = 0
-    val deleteKey = treasuresFitSort.keys.toMutableList()
-    for (i in 0 until treasuresFitSort.size) {
-        var engagedCapacity = 0
-        val varRes = mutableMapOf<String, Int>()
-        for ((key, _) in treasuresFitSort) {
-            engagedCapacity += treasures.getValue(key).first
-            if (engagedCapacity > capacity) {
-                engagedCapacity -= treasures.getValue(key).first
-                continue
-            }
-            varRes += key to treasures.getValue(key).second
-        }
-        if (varRes.values.sum() > maxBenefit) {
-            maxBenefit = varRes.values.sum()
-            res = varRes.keys
-        }
-        treasuresFitSort -= deleteKey[i]
+    val names = mutableListOf<String>()
+    val weights = mutableListOf<Int>()
+    val prices = mutableListOf<Int>()
+    for ((name, values) in treasures) {
+        names += name
+        weights += values.first
+        prices += values.second
     }
+    val table: Array<Array<Int>> = Array(names.size + 1) { Array(capacity + 1) { 0 } }
+    for (k in 1..names.size) {
+        for (c in 1..capacity) {
+            if (c >= weights[k - 1]) table[k][c] = max(table[k - 1][c], table[k - 1][c - weights[k - 1]] + prices[k - 1])
+            else table[k][c] = table[k - 1][c]
+        }
+    }
+    val res = mutableSetOf<String>()
+    fun answerBuild(k: Int, c: Int) {
+        if (table[k][c] == 0) return
+        if (table[k - 1][c] == table[k][c]) answerBuild(k - 1, c)
+        else {
+            answerBuild(k - 1, c - weights[k - 1])
+            res += names[k - 1]
+        }
+    }
+    answerBuild(names.size, capacity)
     return res
 }
