@@ -285,7 +285,7 @@ fun findSumOfTwo(list: List<Int>, number: Int): Pair<Int, Int> {
     var res = Pair(-1, -1)
     for ((value, i) in listM)
         if (listM.containsKey(number - value) && listM[number - value] != i) {
-            res = Pair(i, value)
+            res = Pair(i, listM[number - value]!!)
             break
         }
     return res
