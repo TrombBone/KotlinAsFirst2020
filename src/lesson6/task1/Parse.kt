@@ -3,6 +3,7 @@
 package lesson6.task1
 
 import java.lang.IllegalArgumentException
+import java.lang.NullPointerException
 
 // Урок 6: разбор строк, исключения
 // Максимальное количество баллов = 13
@@ -166,7 +167,7 @@ fun firstDuplicateIndex(str: String): Int = TODO()
  */
 fun mostExpensive(description: String): String {
     val bag = description.split("; ")
-    var maxPrice = 0.0
+    var maxPrice = -1.0
     var maxIndex = ""
     for (i in bag) {
         val product = i.split(" ")
@@ -251,10 +252,14 @@ fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
     val indicesCyclesBorders = cyclesBordersSort.keys.toList()
     val returnerCheck = mutableListOf<Int>()
     for (i in indicesCyclesBorders.indices) {
-        if (cyclesBordersSort[indicesCyclesBorders[i]] == '[') returnerCheck += i
-        else if (cyclesBordersSort[indicesCyclesBorders[i]] == ']') {
-            cycles += indicesCyclesBorders[returnerCheck.max()!!] to indicesCyclesBorders[i]
-            returnerCheck.remove(returnerCheck.max()!!)
+        try {
+            if (cyclesBordersSort[indicesCyclesBorders[i]] == '[') returnerCheck += i
+            else if (cyclesBordersSort[indicesCyclesBorders[i]] == ']') {
+                cycles += indicesCyclesBorders[returnerCheck.max()!!] to indicesCyclesBorders[i]
+                returnerCheck.remove(returnerCheck.max()!!)
+            }
+        } catch (e: NullPointerException) {
+            throw IllegalArgumentException("Unpaired closing bracket")
         }
     }
     val conveyor = Array(cells) { 0 }.toMutableList()
