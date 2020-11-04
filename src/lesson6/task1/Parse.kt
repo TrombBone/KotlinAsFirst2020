@@ -239,10 +239,10 @@ fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
     val cycles = mutableMapOf<Int, Int>()
     var cycleStartIndex = 0
     var cycleEndIndex = 0
-    if (commands.indexOf('[', cycleStartIndex) != -1 && commands.indexOf(']', cycleEndIndex) == -1 ||
-        commands.indexOf('[', cycleStartIndex) == -1 && commands.indexOf(']', cycleEndIndex) != -1)
-        throw IllegalArgumentException("ExtraParenthesis")
-    while (commands.indexOf('[', cycleStartIndex) != -1 && commands.indexOf(']', cycleEndIndex) != -1) {
+    while (commands.indexOf('[', cycleStartIndex) != -1 || commands.indexOf(']', cycleEndIndex) != -1) {
+        if (commands.indexOf('[', cycleStartIndex) != -1 && commands.indexOf(']', cycleEndIndex) == -1 ||
+            commands.indexOf('[', cycleStartIndex) == -1 && commands.indexOf(']', cycleEndIndex) != -1)
+            throw IllegalArgumentException("ExtraParenthesis")
         cyclesBorders += (commands.indexOf('[', cycleStartIndex) to '[')
         cyclesBorders += (commands.indexOf(']', cycleEndIndex) to ']')
         cycleStartIndex = commands.indexOf('[', cycleStartIndex) + 1
