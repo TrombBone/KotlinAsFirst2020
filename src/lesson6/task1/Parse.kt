@@ -2,6 +2,8 @@
 
 package lesson6.task1
 
+import java.lang.IllegalArgumentException
+
 // Урок 6: разбор строк, исключения
 // Максимальное количество баллов = 13
 // Рекомендуемое количество баллов = 11
@@ -162,7 +164,23 @@ fun firstDuplicateIndex(str: String): Int = TODO()
  * или пустую строку при нарушении формата строки.
  * Все цены должны быть больше нуля либо равны нулю.
  */
-fun mostExpensive(description: String): String = TODO()
+fun mostExpensive(description: String): String {
+    val bag = description.split("; ")
+    var maxPrice = 0.0
+    var maxIndex = ""
+    for (i in bag) {
+        val product = i.split(" ")
+        try {
+            if (product[1].toDouble() > maxPrice) {
+                maxPrice = product[1].toDouble()
+                maxIndex = product[0]
+            }
+        } catch (e: Exception) {
+            return ""
+        }
+    }
+    return maxIndex
+}
 
 /**
  * Сложная (6 баллов)
@@ -213,4 +231,51 @@ fun fromRoman(roman: String): Int = TODO()
  * IllegalArgumentException должен бросаться даже если ошибочная команда не была достигнута в ходе выполнения.
  *
  */
-fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> = TODO()
+fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
+    val commandsSet = setOf('>', '<', '+', '-', '[', ']', ' ')
+    for (i in commands.indices) if (!commandsSet.contains(commands[i])) throw IllegalArgumentException("UnknownCommand: ${commands[i]}")
+    val cyclesBorders = mutableMapOf<Int, Char>()
+    val cycles = mutableMapOf<Int, Int>()
+    var cycleStartIndex = 0
+    var cycleEndIndex = 0
+    if (commands.indexOf('[', cycleStartIndex) != -1 && commands.indexOf(']', cycleEndIndex) == -1 ||
+        commands.indexOf('[', cycleStartIndex) == -1 && commands.indexOf(']', cycleEndIndex) != -1)
+        throw IllegalArgumentException("ExtraParenthesis")
+    while (commands.indexOf('[', cycleStartIndex) != -1 && commands.indexOf(']', cycleEndIndex) != -1) {
+        cyclesBorders += (commands.indexOf('[', cycleStartIndex) to '[')
+        cyclesBorders += (commands.indexOf(']', cycleEndIndex) to ']')
+        cycleStartIndex = commands.indexOf('[', cycleStartIndex) + 1
+        cycleEndIndex = commands.indexOf(']', cycleEndIndex) + 1
+    }
+    val cyclesBordersSort = cyclesBorders.toSortedMap()
+    val indicesCyclesBorders = cyclesBordersSort.keys.toList()
+    val returnerCheck = mutableListOf<Int>()
+    for (i in indicesCyclesBorders.indices) {
+        if (cyclesBordersSort[indicesCyclesBorders[i]] == '[') returnerCheck += i
+        else if (cyclesBordersSort[indicesCyclesBorders[i]] == ']') {
+            cycles += indicesCyclesBorders[returnerCheck.max()!!] to indicesCyclesBorders[i]
+            returnerCheck.remove(returnerCheck.max()!!)
+        }
+    }
+    val conveyor = Array(cells) { 0 }.toMutableList()
+    var lim = limit
+    var checker = cells / 2
+    var i = 0
+    val returnerNow = mutableListOf<Int>()
+    while (lim > 0 && i <= commands.length - 1) {
+        when (commands[i]) {
+            '>' -> if (checker + 1 < cells) checker++ else throw IllegalStateException("IndexOutOfBounds by >")
+            '<' -> if (checker - 1 >= 0) checker-- else throw IllegalStateException("IndexOutOfBounds by <")
+            '+' -> conveyor[checker]++
+            '-' -> conveyor[checker]--
+            '[' -> {
+                if (conveyor[checker] != 0) returnerNow += i
+                else i = cycles[i]!!
+            }
+            ']' -> if (conveyor[checker] != 0) i = returnerNow.max()!! else returnerNow.remove(returnerNow.max()!!)
+        }
+        i++
+        lim--
+    }
+    return conveyor
+}
