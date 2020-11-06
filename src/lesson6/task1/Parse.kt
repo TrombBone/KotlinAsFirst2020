@@ -234,50 +234,46 @@ fun fromRoman(roman: String): Int = TODO()
  */
 fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
     val commandsSet = setOf('>', '<', '+', '-', '[', ']', ' ')
-    for (i in commands.indices) if (!commandsSet.contains(commands[i])) throw IllegalArgumentException("UnknownCommand: ${commands[i]}")
+    for (i in commands.indices) if (commands[i] !in commandsSet)
+        throw IllegalArgumentException("UnknownCommand: ${commands[i]}")
     val cyclesBorders = mutableMapOf<Int, Char>()
     val cycles = mutableMapOf<Int, Int>()
     var cycleStartIndex = 0
     var cycleEndIndex = 0
     while (commands.indexOf('[', cycleStartIndex) != -1 || commands.indexOf(']', cycleEndIndex) != -1) {
-        if (commands.indexOf('[', cycleStartIndex) != -1 && commands.indexOf(']', cycleEndIndex) == -1 ||
-            commands.indexOf('[', cycleStartIndex) == -1 && commands.indexOf(']', cycleEndIndex) != -1)
-            throw IllegalArgumentException("ExtraParenthesis")
-        cyclesBorders += (commands.indexOf('[', cycleStartIndex) to '[')
-        cyclesBorders += (commands.indexOf(']', cycleEndIndex) to ']')
         cycleStartIndex = commands.indexOf('[', cycleStartIndex) + 1
         cycleEndIndex = commands.indexOf(']', cycleEndIndex) + 1
+        if (cycleStartIndex - 1 != -1 && cycleEndIndex - 1 == -1 || cycleStartIndex - 1 == -1 && cycleEndIndex - 1 != -1)
+            throw IllegalArgumentException("ExtraParenthesis")
+        cyclesBorders += (cycleStartIndex - 1 to '[')
+        cyclesBorders += (cycleEndIndex - 1 to ']')
     }
     val cyclesBordersSort = cyclesBorders.toSortedMap()
     val indicesCyclesBorders = cyclesBordersSort.keys.toList()
-    val returnerCheck = mutableListOf<Int>()
+    val returner = mutableListOf<Int>()
     for (i in indicesCyclesBorders.indices) {
         try {
-            if (cyclesBordersSort[indicesCyclesBorders[i]] == '[') returnerCheck += i
+            if (cyclesBordersSort[indicesCyclesBorders[i]] == '[') returner += i
             else if (cyclesBordersSort[indicesCyclesBorders[i]] == ']') {
-                cycles += indicesCyclesBorders[returnerCheck.max()!!] to indicesCyclesBorders[i]
-                returnerCheck.remove(returnerCheck.max()!!)
+                cycles += indicesCyclesBorders[returner.max()!!] to indicesCyclesBorders[i]
+                returner.remove(returner.max()!!)
             }
         } catch (e: NullPointerException) {
             throw IllegalArgumentException("Unpaired closing bracket")
         }
     }
-    val conveyor = Array(cells) { 0 }.toMutableList()
+    val conveyor = MutableList(cells) { 0 }
     var lim = limit
     var checker = cells / 2
     var i = 0
-    val returnerNow = mutableListOf<Int>()
     while (lim > 0 && i <= commands.length - 1) {
         when (commands[i]) {
             '>' -> if (checker + 1 < cells) checker++ else throw IllegalStateException("IndexOutOfBounds by >")
             '<' -> if (checker - 1 >= 0) checker-- else throw IllegalStateException("IndexOutOfBounds by <")
             '+' -> conveyor[checker]++
             '-' -> conveyor[checker]--
-            '[' -> {
-                if (conveyor[checker] != 0) returnerNow += i
-                else i = cycles[i]!!
-            }
-            ']' -> if (conveyor[checker] != 0) i = returnerNow.max()!! else returnerNow.remove(returnerNow.max()!!)
+            '[' -> if (conveyor[checker] != 0) returner += i else i = cycles[i]!!
+            ']' -> if (conveyor[checker] != 0) i = returner.max()!! else returner.remove(returner.max()!!)
         }
         i++
         lim--
