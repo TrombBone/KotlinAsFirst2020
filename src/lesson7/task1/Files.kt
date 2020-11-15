@@ -2,7 +2,10 @@
 
 package lesson7.task1
 
+import lesson3.task1.digitNumber
 import java.io.File
+import java.util.*
+import kotlin.math.pow
 
 // Урок 7: работа с файлами
 // Урок интегральный, поэтому его задачи имеют сильно увеличенную стоимость
@@ -395,7 +398,95 @@ fun markdownToHtmlLists(inputName: String, outputName: String) {
  *
  */
 fun markdownToHtml(inputName: String, outputName: String) {
-    TODO()
+    File(outputName).bufferedWriter().use {
+        val nestingTags = Stack<String>()
+        it.write("<html><body>")
+        it.write("<p>")
+        nestingTags.push("</p>")
+        var indentThis: Int
+        var indentPrev = -1
+        var prevEmpty = false
+        for (line in File(inputName).readLines()) {
+            indentThis = Regex("""\s{4}""").findAll(line).count()
+            var regularLine = true
+            if (line.contains(Regex("""^(\s{4})*\*\s""")) || line.contains(Regex("""^(\s{4})*\d+\.\s""")))
+                regularLine = false
+            var lineChange = line.removeRange(0, indentThis * 4 + Regex("""\d""").findAll(line).count() + if (regularLine) 0 else 2)
+
+            if (prevEmpty) {
+                it.write("<p>")
+                nestingTags.push("</p>")
+            }
+            if (line.isEmpty()) {
+                while (nestingTags.lastElement() != "</p>") {
+                    it.write(nestingTags.lastElement())
+                    nestingTags.pop()
+                }
+                it.write("</p>")
+                nestingTags.pop()
+                prevEmpty = true
+                continue
+            } else prevEmpty = false
+            //println(lineChange)
+            var i = 0
+            while (lineChange.contains("~~")) {
+                lineChange = lineChange.replaceFirst("~~", "<s>")
+                lineChange = lineChange.replaceFirst("~~", "</s>")
+            }
+            while (i < lineChange.length) {
+                if (lineChange[i] == '*' && lineChange[i + 1] == '*' && !nestingTags.contains("</b>")) {
+                    lineChange = lineChange.replaceFirst("**", "<b>")
+                    nestingTags.add("</b>")
+                    i++
+                } else if (lineChange[i] == '*' && lineChange[i + 1] == '*' && nestingTags.contains("</b>")) {
+                    lineChange = lineChange.replaceFirst("**", nestingTags.lastElement())
+                    nestingTags.pop()
+                    i++
+                } else if (lineChange[i] == '*' && !nestingTags.contains("</i>")) {
+                    lineChange = lineChange.replaceFirst("*", "<i>")
+                    nestingTags.add("</i>")
+                } else if (lineChange[i] == '*' && nestingTags.contains("</i>")) {
+                    lineChange = lineChange.replaceFirst("*", nestingTags.lastElement())
+                    nestingTags.pop()
+                }
+                i++
+            }
+            //println(nestingTags)
+            if (!regularLine) {
+                if (indentPrev < indentThis) {
+                    if (line.contains(Regex("""^(\s{4})*\*\s"""))) {
+                        it.write("<ul><li>$lineChange")
+                        nestingTags.push("</ul>")
+                        nestingTags.push("</li>")
+                        //
+                    } else if (line.contains(Regex("""^(\s{4})*\d+\.\s"""))) {
+                        it.write("<ol><li>$lineChange")
+                        nestingTags.push("</ol>")
+                        nestingTags.push("</li>")
+                        //
+                    }
+                } else if (indentPrev > indentThis) {
+                    it.write("</li>")
+                    nestingTags.pop()
+                    it.write(nestingTags.lastElement())
+                    nestingTags.pop()
+                    it.write("</li><li>$lineChange")
+                } else if (indentPrev == indentThis) it.write("</li><li>$lineChange")
+                indentPrev = indentThis
+            } else {
+                it.write(lineChange)
+            }
+        }
+
+        while (nestingTags.lastElement() != "</p>") {
+            it.write(nestingTags.lastElement())
+            nestingTags.pop()
+        }
+        it.write("</p>")
+        nestingTags.pop()
+        //println(nestingTags)
+        it.write("</body></html>")
+    }
 }
 
 /**
@@ -449,6 +540,39 @@ fun printMultiplicationProcess(lhv: Int, rhv: Int, outputName: String) {
  *
  */
 fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
-    TODO()
+    File(outputName).bufferedWriter().use {
+        var preDividend = "0"
+        var number = digitNumber(lhv)
+        while (preDividend.toInt() < rhv && number != 0) {
+            number--
+            preDividend = (lhv / 10.0.pow(number)).toInt().toString()
+        }
+        var res = " ".repeat(number + 3) + (lhv / rhv).toString()
+        var indent =
+            if (preDividend.toInt() / rhv * rhv != 0 || preDividend.length == digitNumber(preDividend.toInt() / rhv * rhv)) 1
+            else 0
+        it.write(" ".repeat(indent) + "$lhv | $rhv")
+        it.newLine()
+        while (number >= 0) {
+            val nextDividend = preDividend.toInt() / rhv * rhv
+            it.write(" ".repeat(indent - 1 + preDividend.length - digitNumber(nextDividend)) + "-$nextDividend$res")
+            it.newLine()
+            res = ""
+            it.write(
+                if (preDividend.length > digitNumber(nextDividend) + 1) " ".repeat(indent) + "-".repeat(preDividend.length)
+                else " ".repeat(indent - 1 + preDividend.length - digitNumber(nextDividend)) +
+                        "-".repeat(digitNumber(nextDividend) + 1)
+            )
+            it.newLine()
+            indent += preDividend.length - digitNumber(preDividend.toInt() - nextDividend)
+            preDividend =
+                if (number == 0) (preDividend.toInt() - nextDividend).toString()
+                else (preDividend.toInt() - nextDividend).toString() +
+                        (lhv % 10.0.pow(number).toInt() / 10.0.pow(number - 1).toInt()).toString()
+            it.write(" ".repeat(indent) + preDividend)
+            it.newLine()
+            number--
+        }
+    }
 }
 
