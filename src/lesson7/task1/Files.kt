@@ -549,7 +549,7 @@ fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
         }
         var res = " ".repeat(number + 3) + (lhv / rhv).toString()
         var indent =
-            if (preDividend.toInt() / rhv * rhv != 0 || preDividend.length == digitNumber(preDividend.toInt() / rhv * rhv)) 1
+            if (preDividend.length == digitNumber(preDividend.toInt() / rhv * rhv)) 1
             else 0
         it.write(" ".repeat(indent) + "$lhv | $rhv")
         it.newLine()
