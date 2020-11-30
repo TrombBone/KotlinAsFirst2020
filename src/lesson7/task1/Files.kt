@@ -428,17 +428,11 @@ fun markdownToHtml(inputName: String, outputName: String) {
                 lineChange = lineChange.replaceFirst("~~", "</s>")
             }
             while (i < lineChange.length) {
-                var last = false
-                try {
-                    lineChange[i + 1]
-                } catch (e: StringIndexOutOfBoundsException) {
-                    last = true
-                }
-                if (!last && lineChange[i] == '*' && lineChange[i + 1] == '*' && !nestingTags.contains("</b>")) {
+                if (i < lineChange.length - 1 && lineChange[i] == '*' && lineChange[i + 1] == '*' && !nestingTags.contains("</b>")) {
                     lineChange = lineChange.replaceFirst("**", "<b>")
                     nestingTags.add("</b>")
                     i++
-                } else if (!last && lineChange[i] == '*' && lineChange[i + 1] == '*' && nestingTags.last() == ("</b>")) {
+                } else if (i < lineChange.length - 1 && lineChange[i] == '*' && lineChange[i + 1] == '*' && nestingTags.last() == ("</b>")) {
                     lineChange = lineChange.replaceFirst("**", nestingTags.removeLast())
                     i++
                 } else if (lineChange[i] == '*' && !nestingTags.contains("</i>")) {
