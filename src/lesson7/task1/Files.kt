@@ -5,6 +5,7 @@ package lesson7.task1
 import lesson3.task1.digitNumber
 import java.io.File
 import java.util.*
+import kotlin.collections.ArrayDeque
 import kotlin.math.pow
 
 // Урок 7: работа с файлами
@@ -399,31 +400,24 @@ fun markdownToHtmlLists(inputName: String, outputName: String) {
  */
 fun markdownToHtml(inputName: String, outputName: String) {
     File(outputName).bufferedWriter().use {
-        val nestingTags = Stack<String>()
-        it.write("<html><body>")
-        it.write("<p>")
-        nestingTags.push("</p>")
-        var indentThis: Int
+        val nestingTags = ArrayDeque<String>()
+        it.write("<html><body><p>")
+        nestingTags.add("</p>")
         var indentPrev = -1
         var prevEmpty = false
         for (line in File(inputName).readLines()) {
-            indentThis = Regex("""\s{4}""").findAll(line).count()
-            var regularLine = true
-            if (line.contains(Regex("""^(\s{4})*\*\s""")) || line.contains(Regex("""^(\s{4})*\d+\.\s""")))
-                regularLine = false
+            val indentThis = Regex("""\s{4}""").findAll(line).count()
+            val regularLine = !(line.contains(Regex("""^(\s{4})*\*\s""")) || line.contains(Regex("""^(\s{4})*\d+\.\s""")))
             var lineChange = line.removeRange(0, indentThis * 4 + Regex("""\d""").findAll(line).count() + if (regularLine) 0 else 2)
 
             if (prevEmpty) {
                 it.write("<p>")
-                nestingTags.push("</p>")
+                nestingTags.add("</p>")
             }
             if (line.isEmpty()) {
-                while (nestingTags.lastElement() != "</p>") {
-                    it.write(nestingTags.lastElement())
-                    nestingTags.pop()
-                }
+                while (nestingTags.last() != "</p>") it.write(nestingTags.removeLast())
                 it.write("</p>")
-                nestingTags.pop()
+                nestingTags.removeLast()
                 prevEmpty = true
                 continue
             } else prevEmpty = false
@@ -434,56 +428,52 @@ fun markdownToHtml(inputName: String, outputName: String) {
                 lineChange = lineChange.replaceFirst("~~", "</s>")
             }
             while (i < lineChange.length) {
-                if (lineChange[i] == '*' && lineChange[i + 1] == '*' && !nestingTags.contains("</b>")) {
+                var last = false
+                try {
+                    lineChange[i + 1]
+                } catch (e: StringIndexOutOfBoundsException) {
+                    last = true
+                }
+                if (!last && lineChange[i] == '*' && lineChange[i + 1] == '*' && !nestingTags.contains("</b>")) {
                     lineChange = lineChange.replaceFirst("**", "<b>")
                     nestingTags.add("</b>")
                     i++
-                } else if (lineChange[i] == '*' && lineChange[i + 1] == '*' && nestingTags.contains("</b>")) {
-                    lineChange = lineChange.replaceFirst("**", nestingTags.lastElement())
-                    nestingTags.pop()
+                } else if (!last && lineChange[i] == '*' && lineChange[i + 1] == '*' && nestingTags.last() == ("</b>")) {
+                    lineChange = lineChange.replaceFirst("**", nestingTags.removeLast())
                     i++
                 } else if (lineChange[i] == '*' && !nestingTags.contains("</i>")) {
                     lineChange = lineChange.replaceFirst("*", "<i>")
                     nestingTags.add("</i>")
-                } else if (lineChange[i] == '*' && nestingTags.contains("</i>")) {
-                    lineChange = lineChange.replaceFirst("*", nestingTags.lastElement())
-                    nestingTags.pop()
-                }
+                } else if (lineChange[i] == '*' && nestingTags.last() == ("</i>")) lineChange = lineChange.replaceFirst("*", nestingTags.removeLast())
                 i++
             }
             //println(nestingTags)
-            if (!regularLine) {
-                if (indentPrev < indentThis) {
-                    if (line.contains(Regex("""^(\s{4})*\*\s"""))) {
-                        it.write("<ul><li>$lineChange")
-                        nestingTags.push("</ul>")
-                        nestingTags.push("</li>")
-                        //
-                    } else if (line.contains(Regex("""^(\s{4})*\d+\.\s"""))) {
-                        it.write("<ol><li>$lineChange")
-                        nestingTags.push("</ol>")
-                        nestingTags.push("</li>")
-                        //
-                    }
-                } else if (indentPrev > indentThis) {
-                    it.write("</li>")
-                    nestingTags.pop()
-                    it.write(nestingTags.lastElement())
-                    nestingTags.pop()
-                    it.write("</li><li>$lineChange")
-                } else if (indentPrev == indentThis) it.write("</li><li>$lineChange")
-                indentPrev = indentThis
-            } else {
+            if (regularLine) {
                 it.write(lineChange)
+                continue
             }
+            if (indentPrev < indentThis) {
+                if (line.contains(Regex("""^(\s{4})*\*\s"""))) {
+                    it.write("<ul><li>$lineChange")
+                    nestingTags.add("</ul>")
+                    nestingTags.add("</li>")
+                } else if (line.contains(Regex("""^(\s{4})*\d+\.\s"""))) {
+                    it.write("<ol><li>$lineChange")
+                    nestingTags.add("</ol>")
+                    nestingTags.add("</li>")
+                }
+            } else if (indentPrev > indentThis) {
+                it.write("</li>")
+                nestingTags.removeLast()
+                it.write(nestingTags.removeLast())
+                it.write("</li><li>$lineChange")
+            } else if (indentPrev == indentThis) it.write("</li><li>$lineChange")
+            indentPrev = indentThis
         }
 
-        while (nestingTags.lastElement() != "</p>") {
-            it.write(nestingTags.lastElement())
-            nestingTags.pop()
-        }
+        while (nestingTags.last() != "</p>") it.write(nestingTags.removeLast())
         it.write("</p>")
-        nestingTags.pop()
+        nestingTags.removeLast()
         //println(nestingTags)
         it.write("</body></html>")
     }
