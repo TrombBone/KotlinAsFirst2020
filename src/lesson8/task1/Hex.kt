@@ -9,15 +9,15 @@ import kotlin.math.min
 /**
  * Точка (гекс) на шестиугольной сетке.
  * Координаты заданы как в примере (первая цифра - y, вторая цифра - x)
- *
- *       60  61  62  63  64  65
- *     50  51  52  53  54  55  56
+ * 7-2 7-1 70  71
+ *   6-1 60  61  62  63  64  65
+ * 5-1 50  51  52  53  54  55  56
  *   40  41  42  43  44  45  46  47
  * 30  31  32  33  34  35  36  37  38
  *   21  22  23  24  25  26  27  28
- *     12  13  14  15  16  17  18
- *       03  04  05  06  07  08
- *
+ * 11  12  13  14  15  16  17  18
+ *   02  03  04  05  06  07  08
+ *-12 -13 -14 -15 -16 -17 -18
  * В примерах к задачам используются те же обозначения точек,
  * к примеру, 16 соответствует HexPoint(x = 6, y = 1), а 41 -- HexPoint(x = 1, y = 4).
  *
@@ -111,18 +111,21 @@ class HexSegment(val begin: HexPoint, val end: HexPoint) {
      * Возвращает точку перелома "неправильного" отрезка-ломаной
      * Для "правильного" отрезка вернёт null
      */
-    fun breakPoint(): HexPoint? {
+    fun breakPoint(): HexPoint? { // y=6, x=-1; y=-1, x=8
         if (this.isValid()) return null
         return when {
             end.x < begin.x && end.y < begin.y || end.x > begin.x && end.y > begin.y ->
                 HexPoint(max(end.x, begin.x), min(end.y, begin.y))
-            end.x > begin.x && end.y < begin.y -> {
+            end.x > begin.x && end.y < begin.y && end.x < begin.x + begin.y - end.y -> {
                 val x = min(end.x, begin.x)
                 var y = begin.y
                 while (!HexSegment(HexPoint(x, y), end).isValid()) y--
                 HexPoint(x, y)
             }
-            end.x < begin.x && end.y > begin.y -> {
+            end.x > begin.x && end.y < begin.y && end.x > begin.x + begin.y - end.y ||
+                    end.x < begin.x && end.y > begin.y && begin.x > end.x + end.y - begin.y ->
+                HexPoint(min(begin.x, end.x) + abs(begin.y - end.y), min(end.y, begin.y))
+            end.x < begin.x && end.y > begin.y && begin.x < end.x + end.y - begin.y -> {
                 val x = max(end.x, begin.x)
                 var y = begin.y
                 while (!HexSegment(HexPoint(x, y), end).isValid()) y++

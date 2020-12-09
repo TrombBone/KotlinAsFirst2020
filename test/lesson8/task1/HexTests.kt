@@ -57,6 +57,8 @@ class HexTests {
         assertEquals(HexPoint(4, 3), HexSegment(HexPoint(4, 2), HexPoint(1, 6)).breakPoint())
         assertEquals(HexPoint(5, 3), HexSegment(HexPoint(5, 6), HexPoint(2, 3)).breakPoint())
         assertEquals(HexPoint(5, 3), HexSegment(HexPoint(1, 3), HexPoint(5, 6)).breakPoint())
+        assertEquals(HexPoint(3, 3), HexSegment(HexPoint(5, 3), HexPoint(0, 6)).breakPoint())
+        assertEquals(HexPoint(6, -1), HexSegment(HexPoint(-1, 6), HexPoint(8, -1)).breakPoint())
         assertNull(HexSegment(HexPoint(5, 6), HexPoint(5, 0)).breakPoint())
         assertNull(HexSegment(HexPoint(1, 6), HexPoint(5, 2)).breakPoint())
     }
@@ -125,6 +127,9 @@ class HexTests {
                 HexPoint(y = 4, x = 3),
                 HexPoint(y = 5, x = 3)
             ), pathBetweenHexes(HexPoint(y = 2, x = 2), HexPoint(y = 5, x = 3))
+        )
+        assertEquals(
+            1909, pathBetweenHexes(HexPoint(y = -312, x = 929), HexPoint(y = 599, x = -979)).size
         )
     }
 
