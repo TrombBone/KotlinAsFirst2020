@@ -12,6 +12,8 @@ class HexTests {
     @Tag("3")
     fun hexPointDistance() {
         assertEquals(5, HexPoint(6, 1).distance(HexPoint(1, 4)))
+        assertEquals(2, HexPoint(3, 3).distance(HexPoint(4, 4)))
+        assertEquals(0, HexPoint(3, 3).distance(HexPoint(3, 3)))
     }
 
     @Test
@@ -46,6 +48,17 @@ class HexTests {
         assertEquals(DOWN_LEFT, HexSegment(HexPoint(3, 6), HexPoint(3, 1)).direction())
         assertEquals(UP_LEFT, HexSegment(HexPoint(4, 2), HexPoint(1, 5)).direction())
         assertEquals(INCORRECT, HexSegment(HexPoint(3, 1), HexPoint(6, 2)).direction())
+    }
+
+    @Test
+    @Tag("myFun")
+    fun breakPoint() {
+        assertEquals(HexPoint(1, 5), HexSegment(HexPoint(1, 6), HexPoint(4, 2)).breakPoint())
+        assertEquals(HexPoint(4, 3), HexSegment(HexPoint(4, 2), HexPoint(1, 6)).breakPoint())
+        assertEquals(HexPoint(5, 3), HexSegment(HexPoint(5, 6), HexPoint(2, 3)).breakPoint())
+        assertEquals(HexPoint(5, 3), HexSegment(HexPoint(1, 3), HexPoint(5, 6)).breakPoint())
+        assertNull(HexSegment(HexPoint(5, 6), HexPoint(5, 0)).breakPoint())
+        assertNull(HexSegment(HexPoint(1, 6), HexPoint(5, 2)).breakPoint())
     }
 
     @Test
@@ -128,6 +141,10 @@ class HexTests {
         assertEquals(
             3,
             hexagonByThreePoints(HexPoint(2, 3), HexPoint(3, 3), HexPoint(5, 3))?.radius
+        )
+        assertEquals(
+            Hexagon(HexPoint(4, 2), 0),
+            hexagonByThreePoints(HexPoint(4, 2), HexPoint(4, 2), HexPoint(4, 2))
         )
     }
 
