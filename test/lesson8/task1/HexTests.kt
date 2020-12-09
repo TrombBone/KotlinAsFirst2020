@@ -128,9 +128,8 @@ class HexTests {
                 HexPoint(y = 5, x = 3)
             ), pathBetweenHexes(HexPoint(y = 2, x = 2), HexPoint(y = 5, x = 3))
         )
-        assertEquals(
-            1909, pathBetweenHexes(HexPoint(y = -312, x = 929), HexPoint(y = 599, x = -979)).size
-        )
+        assertEquals(1909, pathBetweenHexes(HexPoint(y = -312, x = 929), HexPoint(y = 599, x = -979)).size)
+        assertEquals(1642, pathBetweenHexes(HexPoint(y = -999, x = 793), HexPoint(y = -999, x = -848)).size)
     }
 
     @Test

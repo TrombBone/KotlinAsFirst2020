@@ -88,7 +88,8 @@ class HexSegment(val begin: HexPoint, val end: HexPoint) {
      * Такими являются, например, отрезок 30-34 (горизонталь), 13-63 (прямая диагональ) или 51-24 (косая диагональ).
      * А, например, 13-26 не является "правильным" отрезком.
      */
-    fun isValid(): Boolean = (begin.x == end.x || begin.y == end.y || end.x - begin.x == begin.y - end.y) && begin != end
+    fun isValid(): Boolean =
+        (begin.x == end.x || begin.y == end.y || end.x - begin.x == begin.y - end.y) && begin != end
 
     /**
      * Средняя (3 балла)
@@ -111,7 +112,7 @@ class HexSegment(val begin: HexPoint, val end: HexPoint) {
      * Возвращает точку перелома "неправильного" отрезка-ломаной
      * Для "правильного" отрезка вернёт null
      */
-    fun breakPoint(): HexPoint? { // y=6, x=-1; y=-1, x=8
+    fun breakPoint(): HexPoint? {
         if (this.isValid()) return null
         return when {
             end.x < begin.x && end.y < begin.y || end.x > begin.x && end.y > begin.y ->
@@ -244,17 +245,25 @@ fun HexPoint.move(direction: Direction, distance: Int): HexPoint {
 fun pathBetweenHexes(from: HexPoint, to: HexPoint): List<HexPoint> {
     val list = mutableListOf(from)
     val breakPoint = HexSegment(from, to).breakPoint()
-    val direction1 = HexSegment(from, breakPoint!!).direction()
-    val direction2 = HexSegment(breakPoint, to).direction()
     var newFrom = from
-    var newBreak = breakPoint
-    for (i in 0 until from.distance(breakPoint)) {
-        newFrom = newFrom.move(direction1, 1)
-        list.add(newFrom)
-    }
-    for (i in 0 until breakPoint.distance(to)) {
-        newBreak = newBreak!!.move(direction2, 1)
-        list.add(newBreak)
+    if (breakPoint != null) {
+        val direction1 = HexSegment(from, breakPoint).direction()
+        val direction2 = HexSegment(breakPoint, to).direction()
+        var newBreak = breakPoint
+        for (i in 0 until from.distance(breakPoint)) {
+            newFrom = newFrom.move(direction1, 1)
+            list.add(newFrom)
+        }
+        for (i in 0 until breakPoint.distance(to)) {
+            newBreak = newBreak!!.move(direction2, 1)
+            list.add(newBreak)
+        }
+    } else {
+        val direction = HexSegment(from, to).direction()
+        for (i in 0 until from.distance(to)) {
+            newFrom = newFrom.move(direction, 1)
+            list.add(newFrom)
+        }
     }
     return list
 }
