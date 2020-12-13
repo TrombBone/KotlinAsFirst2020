@@ -303,14 +303,18 @@ fun pathBetweenHexes(from: HexPoint, to: HexPoint): List<HexPoint> {
  */
 fun hexagonByThreePoints(a: HexPoint, b: HexPoint, c: HexPoint): Hexagon? {
     if (setOf(a, b, c).size == 1) return Hexagon(a, 0)
-    val minRadius = maxOf(a.distance(b), a.distance(c), b.distance(c)) / 2
     val maxRadius = maxOf(a.distance(b), a.distance(c), b.distance(c))
+    val minRadius = maxRadius / 2
+    var resOld = emptySet<HexPoint>()
+    var resNow: Set<HexPoint>
     for (r in minRadius..maxRadius) {
         val hexagonASet = Hexagon(a, r).border()
         val hexagonBSet = Hexagon(b, r).border()
         val hexagonCSet = Hexagon(c, r).border()
-        val res = hexagonASet.intersect(hexagonBSet).intersect(hexagonCSet)
-        if (res.size == 1 || res.size == 2) return Hexagon(res.first(), r)
+        resNow = hexagonASet.intersect(hexagonBSet).intersect(hexagonCSet)
+        if (resNow.size == 1 || resNow.size == 2) return Hexagon(resNow.first(), r)
+        if (resNow.isEmpty() && resOld.isNotEmpty()) return Hexagon(resOld.first(), r - 1)
+        resOld = resNow
     }
     return null
 }
