@@ -306,10 +306,10 @@ fun hexagonByThreePoints(a: HexPoint, b: HexPoint, c: HexPoint): Hexagon? {
     val minRadius = maxOf(a.distance(b), a.distance(c), b.distance(c)) / 2
     val maxRadius = maxOf(a.distance(b), a.distance(c), b.distance(c))
     for (r in minRadius..maxRadius) {
-//        val hexagonASet = Hexagon(a, r).border()
-//        val hexagonBSet = Hexagon(b, r).border()
-//        val hexagonCSet = Hexagon(c, r).border()
-        val res = Hexagon(a, r).border().intersect(Hexagon(b, r).border()).intersect(Hexagon(c, r).border())
+        val hexagonASet = Hexagon(a, r).border()
+        val hexagonBSet = Hexagon(b, r).border()
+        val hexagonCSet = Hexagon(c, r).border()
+        val res = hexagonASet.intersect(hexagonBSet).intersect(hexagonCSet)
         if (res.size == 1 || res.size == 2) return Hexagon(res.first(), r)
     }
     return null
