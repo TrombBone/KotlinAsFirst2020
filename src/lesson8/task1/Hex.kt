@@ -74,6 +74,24 @@ data class Hexagon(val center: HexPoint, val radius: Int) {
      * Вернуть true, если заданная точка находится внутри или на границе шестиугольника
      */
     fun contains(point: HexPoint): Boolean = center.distance(point) <= radius
+
+    /**
+     * Возвращает множество точек, располагающихся на границе шестиугольника
+     */
+    fun border(): Set<HexPoint> {
+        val set = mutableSetOf<HexPoint>()
+        var point = center.move(Direction.DOWN_LEFT, radius)
+        var direction = Direction.RIGHT
+        repeat(6) {
+            repeat(radius) {
+                point = point.move(direction, 1)
+                set.add(point)
+            }
+            direction = direction.next()
+        }
+        return set.toSet()
+    }
+
 }
 
 /**
@@ -285,18 +303,14 @@ fun pathBetweenHexes(from: HexPoint, to: HexPoint): List<HexPoint> {
  */
 fun hexagonByThreePoints(a: HexPoint, b: HexPoint, c: HexPoint): Hexagon? {
     if (setOf(a, b, c).size == 1) return Hexagon(a, 0)
-    val min = minOf(a.distance(b), a.distance(c), b.distance(c)) / 2
-    val max = maxOf(a.distance(b), a.distance(c), b.distance(c))
-    for (r in min..max) {
-        var center = a.move(Direction.DOWN_LEFT, r)
-        for (direction in Direction.values().dropLast(1)) {
-            for (i in 0 until r) {
-                val distanceB = center.distance(b)
-                val distanceC = center.distance(c)
-                if (distanceB != r || distanceC != r) center = center.move(direction, 1)
-                else return Hexagon(center, r)
-            }
-        }
+    val minRadius = maxOf(a.distance(b), a.distance(c), b.distance(c)) / 2
+    val maxRadius = maxOf(a.distance(b), a.distance(c), b.distance(c))
+    for (r in minRadius..maxRadius) {
+        val hexagonASet = Hexagon(a, r).border()
+        val hexagonBSet = Hexagon(b, r).border()
+        val hexagonCSet = Hexagon(c, r).border()
+        val res = hexagonASet.intersect(hexagonBSet).intersect(hexagonCSet)
+        if (res.size == 2 || res.size == 1) return Hexagon(res.first(), r)
     }
     return null
 }
