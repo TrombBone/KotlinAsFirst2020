@@ -310,7 +310,7 @@ fun hexagonByThreePoints(a: HexPoint, b: HexPoint, c: HexPoint): Hexagon? {
         val hexagonBSet = Hexagon(b, r).border()
         val hexagonCSet = Hexagon(c, r).border()
         val res = hexagonASet.intersect(hexagonBSet).intersect(hexagonCSet)
-        if (res.size == 2 || res.size == 1) return Hexagon(res.first(), r)
+        if (res.size == 1 || res.size == 2) return Hexagon(res.first(), r)
     }
     return null
 }
