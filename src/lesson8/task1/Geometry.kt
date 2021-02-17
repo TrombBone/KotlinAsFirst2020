@@ -235,7 +235,9 @@ fun circleByThreePoints(a: Point, b: Point, c: Point): Circle {
  * три точки данного множества, либо иметь своим диаметром отрезок,
  * соединяющий две самые удалённые точки в данном множестве.
  */
-fun minContainingCircle(vararg points: Point): Circle {
+fun minContainingCircle(vararg points: Point): Circle = TODO()
+/*
+{
     if (points.isEmpty()) throw  IllegalArgumentException()
     if (points.size == 1) return Circle(points[0], 0.0)
     val allPoints = points.toMutableSet()
@@ -278,4 +280,5 @@ fun minContainingCircle(vararg points: Point): Circle {
     }
     return minCircle
 }
+ */
 
