@@ -1,6 +1,7 @@
 package lesson11.task1
 
 import lesson3.task1.digitNumber
+import kotlin.math.pow
 
 /**
  * Класс "беззнаковое большое целое число".
@@ -13,41 +14,58 @@ import lesson3.task1.digitNumber
  * преобразование в строку/из строки, преобразование в целое/из целого,
  * сравнение на равенство и неравенство
  */
-class UnsignedBigInteger : Comparable<UnsignedBigInteger> {
+class UnsignedBigInteger(private val unsignedBigInteger: MutableList<Int>) : Comparable<UnsignedBigInteger> {
+    private var fromConstructor = false
 
-    private val unsignedBigInteger: MutableList<Int> = mutableListOf()
+//    init {
+//        if (!fromConstructor) {
+//            for (i in 0 until unsignedBigInteger.size - 1) {
+//                while (unsignedBigInteger[i] * 10 + unsignedBigInteger[i + 1] > 0) {
+//                    unsignedBigInteger[i] = unsignedBigInteger[i] * 10 + unsignedBigInteger[i + 1]
+//                    unsignedBigInteger.removeAt(i + 1)
+//                }
+//                //break
+//            }
+//        }
+//        val str = "12345"
+//        str.reversed()
+//    }
 
     /**
      * Конструктор из строки
      */
-    constructor(s: String) {
+    constructor(s: String) : this(toMList(s)) {
+        fromConstructor = true
         if (!s.matches(Regex("""\d+"""))) throw NumberFormatException("number contains unknown characters")
-        try {
-            unsignedBigInteger.add(s.toInt())
-        } catch (e: NumberFormatException) {
-            var postStr = Regex("""^(0+)""").replace(s, "")
-            while (postStr.isNotEmpty()) {
-                val startIntStr = try {
-                    postStr.substring(0, if (postStr.length > 10) 10 else postStr.length).toInt()
-                } catch (e: NumberFormatException) {
-                    postStr.substring(0, 9).toInt()
-                }
-                unsignedBigInteger.add(startIntStr)
-                if (digitNumber(startIntStr) - 1 == postStr.lastIndex) break
-                else postStr = postStr.substring(digitNumber(startIntStr), postStr.length)
-                while (postStr.matches(Regex("""0\d*"""))) {
-                    unsignedBigInteger.add(0)
-                    postStr = postStr.replaceFirst("0", "")
+    }
+
+    companion object {
+        fun toMList(s: String): MutableList<Int> {
+            val list = mutableListOf<Int>()
+            s.toIntOrNull()?.let { list.add(it) } ?: run {
+                var postStr = Regex("""^(0+)""").replace(s, "")
+                while (postStr.isNotEmpty()) {
+                    val startIntStr =
+                        postStr.substring(0, if (postStr.length > 10) 10 else postStr.length).toIntOrNull()
+                            ?: postStr.substring(0, 9).toInt()
+                    list.add(startIntStr)
+                    if (digitNumber(startIntStr) - 1 == postStr.lastIndex) break
+                    else postStr = postStr.substring(digitNumber(startIntStr), postStr.length)
+                    while (postStr.matches(Regex("""0\d*"""))) {
+                        list.add(0)
+                        postStr = postStr.replaceFirst("0", "")
+                    }
                 }
             }
+            return list
         }
     }
 
     /**
      * Конструктор из целого
      */
-    constructor(i: Int) {
-        unsignedBigInteger.add(i)
+    constructor(i: Int) : this(mutableListOf(i)) {
+        fromConstructor = true
     }
 
     /**
@@ -58,20 +76,17 @@ class UnsignedBigInteger : Comparable<UnsignedBigInteger> {
 //        println("other unsignedBigInteger: $other")
         val biggerSize = maxOf(toString().length, other.toString().length)
         val smallerSize = minOf(toString().length, other.toString().length)
-        var res = ""
+        var res = "" //mutableListOf<Int>()
         var memory = 0
         for (i in 1..biggerSize) {
-            val digit: Int = try {
-                getValue(biggerSize - 1).toString() //условие try, toString() для ориентации
+            val digit: Int = memory + if (toString().length == biggerSize)
                 getValue(biggerSize - i) + if (i >= smallerSize + 1) 0 else other.getValue(smallerSize - i)
-            } catch (e: StringIndexOutOfBoundsException) {
-                other.getValue(biggerSize - i) + if (i >= smallerSize + 1) 0 else getValue(smallerSize - i)
-            } + memory
+            else other.getValue(biggerSize - i) + if (i >= smallerSize + 1) 0 else getValue(smallerSize - i)
             memory = 0
             if (digitNumber(digit) > 1) memory++
-            res = "${digit % 10}" + res
+            res = "${digit % 10}" + res //.add(0, digit % 10)
         }
-        if (memory != 0) res = "1$res"
+        if (memory != 0) res = "1$res" //.add(0, 1)
         return UnsignedBigInteger(res)
     }
 
@@ -85,12 +100,9 @@ class UnsignedBigInteger : Comparable<UnsignedBigInteger> {
         var res = ""
         var negativeMemory = 0
         for (i in 1..biggerSize) {
-            var digit: Int = try {
-                getValue(biggerSize - 1).toString()
+            var digit: Int = negativeMemory + if (toString().length == biggerSize)
                 getValue(biggerSize - i) - if (i >= smallerSize + 1) 0 else other.getValue(smallerSize - i)
-            } catch (e: StringIndexOutOfBoundsException) {
-                other.getValue(biggerSize - i) - if (i >= smallerSize + 1) 0 else getValue(smallerSize - i)
-            } + negativeMemory
+            else other.getValue(biggerSize - i) - if (i >= smallerSize + 1) 0 else getValue(smallerSize - i)
             negativeMemory = 0
             if (digit < 0) {
                 digit += 10
@@ -115,12 +127,9 @@ class UnsignedBigInteger : Comparable<UnsignedBigInteger> {
         for (j in 1..smallerSize) {
             var term = ""
             for (i in 1..biggerSize) {
-                val digit: Int = try {
-                    getValue(biggerSize - 1).toString()
+                val digit: Int = memory + if (toString().length == biggerSize)
                     getValue(biggerSize - i) * other.getValue(smallerSize - j)
-                } catch (e: StringIndexOutOfBoundsException) {
-                    other.getValue(biggerSize - i) * getValue(smallerSize - j)
-                } + memory
+                else other.getValue(biggerSize - i) * getValue(smallerSize - j)
                 memory = 0
                 if (digitNumber(digit) > 1) memory += digit / 10
                 term = "${digit % 10}" + term
@@ -170,11 +179,8 @@ class UnsignedBigInteger : Comparable<UnsignedBigInteger> {
     /**
      * Сравнение на равенство (по контракту Any.equals)
      */
-    override fun equals(other: Any?): Boolean {
-        if (other !is UnsignedBigInteger || toString().length != other.toString().length) return false
-        for (i in 0..toString().lastIndex) if (toString()[i] != other.toString()[i]) return false
-        return true
-    }
+    override fun equals(other: Any?): Boolean =
+        other is UnsignedBigInteger && (unsignedBigInteger == other.unsignedBigInteger)
 
     /**
      * Сравнение на больше/меньше (по контракту Comparable.compareTo)
@@ -204,6 +210,15 @@ class UnsignedBigInteger : Comparable<UnsignedBigInteger> {
     /**
      * Получение цифры по индексу
      */
-    fun getValue(i: Int): Int = (toString()[i] - '0')
+    fun getValue(i: Int): Int {
+        var count = 0
+        for (j in 0 until unsignedBigInteger.size)
+            for (k in 0 until digitNumber(unsignedBigInteger[j])) {
+                if (count == i) return (unsignedBigInteger[j] / 10.0.pow(digitNumber(unsignedBigInteger[j]) - 1 - k)).toInt() % 10
+                count++
+            }
+        throw IndexOutOfBoundsException("nonexistent index")
+    }
+
     override fun hashCode(): Int = unsignedBigInteger.hashCode()
 }
