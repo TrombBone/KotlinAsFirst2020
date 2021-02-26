@@ -37,12 +37,11 @@ class UnsignedBigInteger(private val unsignedBigInteger: MutableList<Int>) : Com
     /**
      * Конструктор из строки
      */
-    constructor(s: String) : this(toMList(s)) {
-        if (!s.matches(Regex("""\d+"""))) throw NumberFormatException("number contains unknown characters")
-    }
+    constructor(s: String) : this(toMList(s))
 
     companion object {
         fun toMList(s: String): MutableList<Int> {
+            if (!s.matches(Regex("""\d+"""))) throw NumberFormatException("number contains unknown characters")
             val list = mutableListOf<Int>()
             s.toIntOrNull()?.let { list.add(it) } ?: run {
                 var postStr = Regex("""^(0+)""").replace(s, "")
@@ -74,12 +73,12 @@ class UnsignedBigInteger(private val unsignedBigInteger: MutableList<Int>) : Com
     operator fun plus(other: UnsignedBigInteger): UnsignedBigInteger {
 //        println("this unsignedBigInteger: $this")
 //        println("other unsignedBigInteger: $other")
-        val biggerSize = maxOf(toString().length, other.toString().length)
-        val smallerSize = minOf(toString().length, other.toString().length)
+        val biggerSize = maxOf(realSize(), other.realSize())
+        val smallerSize = minOf(realSize(), other.realSize())
         val res = mutableListOf<Int>()
         var memory = 0
         for (i in 1..biggerSize) {
-            val digit: Int = memory + if (toString().length == biggerSize)
+            val digit: Int = memory + if (realSize() == biggerSize)
                 getValue(biggerSize - i) + if (i >= smallerSize + 1) 0 else other.getValue(smallerSize - i)
             else other.getValue(biggerSize - i) + if (i >= smallerSize + 1) 0 else getValue(smallerSize - i)
             memory = 0
@@ -95,12 +94,12 @@ class UnsignedBigInteger(private val unsignedBigInteger: MutableList<Int>) : Com
      */
     operator fun minus(other: UnsignedBigInteger): UnsignedBigInteger {
         if (this < other) throw ArithmeticException("negative numbers are not allowed")
-        val biggerSize = maxOf(toString().length, other.toString().length)
-        val smallerSize = minOf(toString().length, other.toString().length)
+        val biggerSize = maxOf(realSize(), other.realSize())
+        val smallerSize = minOf(realSize(), other.realSize())
         val res = mutableListOf<Int>()
         var negativeMemory = 0
         for (i in 1..biggerSize) {
-            var digit: Int = negativeMemory + if (toString().length == biggerSize)
+            var digit: Int = negativeMemory + if (realSize() == biggerSize)
                 getValue(biggerSize - i) - if (i >= smallerSize + 1) 0 else other.getValue(smallerSize - i)
             else other.getValue(biggerSize - i) - if (i >= smallerSize + 1) 0 else getValue(smallerSize - i)
             negativeMemory = 0
@@ -117,8 +116,8 @@ class UnsignedBigInteger(private val unsignedBigInteger: MutableList<Int>) : Com
      * Умножение
      */
     operator fun times(other: UnsignedBigInteger): UnsignedBigInteger {
-        val biggerSize = maxOf(toString().length, other.toString().length)
-        val smallerSize = minOf(toString().length, other.toString().length)
+        val biggerSize = maxOf(realSize(), other.realSize())
+        val smallerSize = minOf(realSize(), other.realSize())
         val zeros = Regex("""(0*)$""").find(this.toString())?.value ?: "" +
         (Regex("""(0*)$""").find(other.toString())?.value ?: "")
         val res: MutableList<Int>
@@ -127,7 +126,7 @@ class UnsignedBigInteger(private val unsignedBigInteger: MutableList<Int>) : Com
         for (j in 1..smallerSize) {
             val term = mutableListOf<Int>() // ""
             for (i in 1..biggerSize) {
-                val digit: Int = memory + if (toString().length == biggerSize)
+                val digit: Int = memory + if (realSize() == biggerSize)
                     getValue(biggerSize - i) * other.getValue(smallerSize - j)
                 else other.getValue(biggerSize - i) * getValue(smallerSize - j)
                 memory = 0
@@ -152,8 +151,8 @@ class UnsignedBigInteger(private val unsignedBigInteger: MutableList<Int>) : Com
     operator fun div(other: UnsignedBigInteger): UnsignedBigInteger {
         if (other == UnsignedBigInteger(0)) throw java.lang.ArithmeticException("cannot be divided by zero")
         if (other > this) return UnsignedBigInteger(0)
-        val biggerSize = maxOf(toString().length, other.toString().length)
-        val smallerSize = minOf(toString().length, other.toString().length)
+        val biggerSize = maxOf(realSize(), other.realSize())
+        val smallerSize = minOf(realSize(), other.realSize())
         val res = mutableListOf<Int>()
         var number = toString().substring(0, smallerSize)
         for (i in smallerSize..biggerSize) {
@@ -180,17 +179,19 @@ class UnsignedBigInteger(private val unsignedBigInteger: MutableList<Int>) : Com
      * Сравнение на равенство (по контракту Any.equals)
      */
     override fun equals(other: Any?): Boolean =
-        other is UnsignedBigInteger && (unsignedBigInteger == other.unsignedBigInteger)
+        other is UnsignedBigInteger && unsignedBigInteger == other.unsignedBigInteger
 
     /**
      * Сравнение на больше/меньше (по контракту Comparable.compareTo)
      */
     override fun compareTo(other: UnsignedBigInteger): Int {
-        if (toString().length > other.toString().length) return 1
-        if (toString().length < other.toString().length) return -1
-        for (i in 0..toString().lastIndex) {
-            if (getValue(i) > other.getValue(i)) return 1
-            if (getValue(i) < other.getValue(i)) return -1
+        if (realSize() > other.realSize()) return 1
+        if (realSize() < other.realSize()) return -1
+        for (i in 0 until unsignedBigInteger.size) {
+            if (digitNumber(unsignedBigInteger[i]) < digitNumber(other.unsignedBigInteger[i])) return 1
+            if (digitNumber(unsignedBigInteger[i]) > digitNumber(other.unsignedBigInteger[i])) return -1
+            if (unsignedBigInteger[i] > other.unsignedBigInteger[i]) return 1
+            if (unsignedBigInteger[i] < other.unsignedBigInteger[i]) return -1
         }
         return 0
     }
@@ -207,6 +208,31 @@ class UnsignedBigInteger(private val unsignedBigInteger: MutableList<Int>) : Com
     fun toInt(): Int =
         if (unsignedBigInteger.size > 1) throw ArithmeticException("too big number") else unsignedBigInteger[0]
 
+    override fun hashCode(): Int = unsignedBigInteger.hashCode()
+
+    /**
+     * Длина беззнакового большого целого числа
+     */
+    private fun realSize(): Int {
+        var count = 0
+        for (j in 0 until unsignedBigInteger.size)
+            for (k in 0 until digitNumber(unsignedBigInteger[j])) count++
+        return count
+    }
+
+    /**
+     * Преобразование из 10-ой системы счисления(cc) в сс с основанием Int.MAX_VALUE
+     */
+    fun toIntMAXVALUE(): MutableList<Int> {
+        val list = mutableListOf<Int>()
+        var number = this
+        while (number.rem(UnsignedBigInteger(Int.MAX_VALUE)).toInt() != 0) {
+            list.add(0, number.rem(UnsignedBigInteger(Int.MAX_VALUE)).toInt())
+            number /= UnsignedBigInteger(Int.MAX_VALUE)
+        }
+        return list
+    }
+
     /**
      * Получение цифры по индексу
      */
@@ -219,6 +245,19 @@ class UnsignedBigInteger(private val unsignedBigInteger: MutableList<Int>) : Com
             }
         throw IndexOutOfBoundsException("nonexistent index")
     }
+}
 
-    override fun hashCode(): Int = unsignedBigInteger.hashCode()
+/**
+ * Преобразование в 10-ю систему счисления(cc) из сс с основанием Int.MAX_VALUE
+ */
+fun toDecimal(list: MutableList<Int>): UnsignedBigInteger {
+    val terms = mutableListOf<UnsignedBigInteger>()
+    var res = UnsignedBigInteger(0)
+    for (i in list.indices) {
+        var powIntMAXVALUE = UnsignedBigInteger(1)
+        for (j in i until list.lastIndex) powIntMAXVALUE *= UnsignedBigInteger(Int.MAX_VALUE) //по сути это Int.MAX_VALUE.pow()
+        terms.add(UnsignedBigInteger(list[i]) * powIntMAXVALUE)
+    }
+    for (i in terms.indices) res += terms[i]
+    return res
 }
