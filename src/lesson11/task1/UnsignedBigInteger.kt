@@ -44,16 +44,14 @@ class UnsignedBigInteger(private val unsignedBigInteger: MutableList<Int>) : Com
     operator fun plus(other: UnsignedBigInteger): UnsignedBigInteger {
 //        println("this unsignedBigInteger: $this")
 //        println("other unsignedBigInteger: $other")
-        val biggerSize = maxOf(unsignedBigInteger.size, other.unsignedBigInteger.size)
-        val smallerSize = minOf(unsignedBigInteger.size, other.unsignedBigInteger.size)
+        val bigger = if (this > other) unsignedBigInteger else other.unsignedBigInteger
+        val smaller = if (this < other) unsignedBigInteger else other.unsignedBigInteger
         val res = mutableListOf<Int>()
         var memory = 0
-        for (i in 1..biggerSize) {
-            val digit: Int = memory + if (unsignedBigInteger.size == biggerSize)
-                unsignedBigInteger[biggerSize - i] + if (i >= smallerSize + 1) 0 else other.unsignedBigInteger[smallerSize - i]
-            else other.unsignedBigInteger[biggerSize - i] + if (i >= smallerSize + 1) 0 else unsignedBigInteger[smallerSize - i]
-            memory = 0
-            if (digitNumber(digit) > 1) memory++
+        for (i in 1..bigger.size) {
+            val digit: Int =
+                memory + bigger[bigger.size - i] + if (i >= smaller.size + 1) 0 else smaller[smaller.size - i]
+            memory = if (digitNumber(digit) > 1) 1 else 0
             res.add(digit % 10)
         }
         if (memory != 0) res.add(1)
@@ -65,19 +63,17 @@ class UnsignedBigInteger(private val unsignedBigInteger: MutableList<Int>) : Com
      */
     operator fun minus(other: UnsignedBigInteger): UnsignedBigInteger {
         if (this < other) throw ArithmeticException("negative numbers are not allowed")
-        val biggerSize = maxOf(unsignedBigInteger.size, other.unsignedBigInteger.size)
-        val smallerSize = minOf(unsignedBigInteger.size, other.unsignedBigInteger.size)
+        val bigger = if (this > other) unsignedBigInteger else other.unsignedBigInteger
+        val smaller = if (this < other) unsignedBigInteger else other.unsignedBigInteger
         val res = mutableListOf<Int>()
         var negativeMemory = 0
-        for (i in 1..biggerSize) {
-            var digit: Int = negativeMemory + if (unsignedBigInteger.size == biggerSize)
-                unsignedBigInteger[biggerSize - i] - if (i >= smallerSize + 1) 0 else other.unsignedBigInteger[smallerSize - i]
-            else other.unsignedBigInteger[biggerSize - i] - if (i >= smallerSize + 1) 0 else unsignedBigInteger[smallerSize - i]
-            negativeMemory = 0
+        for (i in 1..bigger.size) {
+            var digit: Int =
+                negativeMemory + bigger[bigger.size - i] - if (i >= smaller.size + 1) 0 else smaller[smaller.size - i]
             if (digit < 0) {
                 digit += 10
                 negativeMemory = -1
-            }
+            } else negativeMemory = 0
             res.add(digit % 10)
         }
         return UnsignedBigInteger(res.asReversed())
@@ -89,20 +85,18 @@ class UnsignedBigInteger(private val unsignedBigInteger: MutableList<Int>) : Com
     operator fun times(other: UnsignedBigInteger): UnsignedBigInteger {
         val bigger = if (this > other) unsignedBigInteger else other.unsignedBigInteger
         val smaller = if (this < other) unsignedBigInteger else other.unsignedBigInteger
-        var memory = 0
         val terms = mutableListOf<UnsignedBigInteger>()
         for (j in 1..smaller.size) {
             var term = mutableListOf<Int>()
+            var memory = 0
             for (i in 1..bigger.size) {
                 val digit: Int = memory + bigger[bigger.size - i] * smaller[smaller.size - j]
-                memory = 0
-                if (digitNumber(digit) > 1) memory += digit / 10
+                memory = if (digitNumber(digit) > 1) digit / 10 else 0
                 term.add(digit % 10)
             }
             if (memory != 0) term.add(memory)
             term = term.asReversed()
             for (k in 1 until j) term.add(0)
-            memory = 0
             terms.add(UnsignedBigInteger(term))
         }
         var res = UnsignedBigInteger(0)
@@ -119,24 +113,21 @@ class UnsignedBigInteger(private val unsignedBigInteger: MutableList<Int>) : Com
         val biggerSize = maxOf(unsignedBigInteger.size, other.unsignedBigInteger.size)
         val smallerSize = minOf(unsignedBigInteger.size, other.unsignedBigInteger.size)
         val res = mutableListOf<Int>()
-        var number = UnsignedBigInteger(unsignedBigInteger[0])
-        for (i in 1 until smallerSize) number =
-            number * UnsignedBigInteger(10) + UnsignedBigInteger(unsignedBigInteger[i])
+        var number = mutableListOf<Int>()
+        for (i in 0 until smallerSize) number.add(unsignedBigInteger[i])
         for (i in smallerSize..biggerSize) {
             var r = 0
-            if (number < other) {
-                number = number * UnsignedBigInteger(10) +
-                        if (i != biggerSize) UnsignedBigInteger(unsignedBigInteger[i]) else UnsignedBigInteger(0)
+            if (UnsignedBigInteger(number) < other) {
+                number.add(if (i != biggerSize) unsignedBigInteger[i] else 0)
                 res.add(0)
                 continue
             }
-            while (number >= other) {
-                number -= other
+            while (UnsignedBigInteger(number) >= other) {
+                number = (UnsignedBigInteger(number) - other).unsignedBigInteger
                 r++
             }
             res.add(r)
-            number = number * UnsignedBigInteger(10) +
-                    if (i != biggerSize) UnsignedBigInteger(unsignedBigInteger[i]) else UnsignedBigInteger(0)
+            number.add(if (i != biggerSize) unsignedBigInteger[i] else 0)
         }
         return UnsignedBigInteger(res)
     }
