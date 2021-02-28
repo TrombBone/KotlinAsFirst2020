@@ -14,6 +14,7 @@ import lesson3.task1.digitNumber
  * сравнение на равенство и неравенство
  */
 class UnsignedBigInteger(private val unsignedBigInteger: MutableList<Int>) : Comparable<UnsignedBigInteger> {
+
     init {
         while (unsignedBigInteger.size > 1 && unsignedBigInteger[0] == 0) unsignedBigInteger.remove(0)
     }
