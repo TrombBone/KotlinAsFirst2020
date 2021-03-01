@@ -22,19 +22,29 @@ class UnsignedBigInteger(private val unsignedBigInteger: MutableList<Int>) : Com
     /**
      * Конструктор из строки
      */
-    constructor(s: String) : this(toMList(s))
+    constructor(s: String) : this(toMListFromStr(s))
 
     /**
      * Конструктор из целого
      */
-    constructor(i: Int) : this(toMList(i.toString()))//так как нельзя создать вторую функцию типа companion object, чтобы вызвать ёё в this()
+    constructor(i: Int) : this(toMListFromInt(i))
 
     companion object {
-        fun toMList(s: String): MutableList<Int> {
+        fun toMListFromStr(s: String): MutableList<Int> {
             if (!s.matches(Regex("""\d+"""))) throw NumberFormatException("number contains unknown characters")
             val list = mutableListOf<Int>()
             for (i in s.indices) list.add(s[i] - '0')
             return list
+        }
+
+        fun toMListFromInt(number: Int): MutableList<Int> {
+            val list = mutableListOf<Int>()
+            var n = number
+            for (i in 0 until digitNumber(number)) {
+                list.add(n % 10)
+                n /= 10
+            }
+            return list.asReversed()
         }
     }
 
@@ -42,17 +52,14 @@ class UnsignedBigInteger(private val unsignedBigInteger: MutableList<Int>) : Com
      * Сложение
      */
     operator fun plus(other: UnsignedBigInteger): UnsignedBigInteger {
-//        println("this unsignedBigInteger: $this")
-//        println("other unsignedBigInteger: $other")
         val bigger = if (this > other) unsignedBigInteger else other.unsignedBigInteger
         val smaller = if (this < other) unsignedBigInteger else other.unsignedBigInteger
         val res = mutableListOf<Int>()
         var memory = 0
         for (i in 1..bigger.size) {
-            val digit: Int =
-                memory + bigger[bigger.size - i] + if (i >= smaller.size + 1) 0 else smaller[smaller.size - i]
-            memory = if (digitNumber(digit) > 1) 1 else 0
+            val digit: Int = memory + bigger[bigger.size - i] + (smaller.getOrNull(smaller.size - i) ?: 0)
             res.add(digit % 10)
+            memory = digit / 10
         }
         if (memory != 0) res.add(1)
         return UnsignedBigInteger(res.asReversed())
@@ -63,13 +70,11 @@ class UnsignedBigInteger(private val unsignedBigInteger: MutableList<Int>) : Com
      */
     operator fun minus(other: UnsignedBigInteger): UnsignedBigInteger {
         if (this < other) throw ArithmeticException("negative numbers are not allowed")
-        val bigger = if (this > other) unsignedBigInteger else other.unsignedBigInteger
-        val smaller = if (this < other) unsignedBigInteger else other.unsignedBigInteger
         val res = mutableListOf<Int>()
         var negativeMemory = 0
-        for (i in 1..bigger.size) {
-            var digit: Int =
-                negativeMemory + bigger[bigger.size - i] - if (i >= smaller.size + 1) 0 else smaller[smaller.size - i]
+        for (i in 1..unsignedBigInteger.size) {
+            var digit: Int = negativeMemory + unsignedBigInteger[unsignedBigInteger.size - i] -
+                    (other.unsignedBigInteger.getOrNull(other.unsignedBigInteger.size - i) ?: 0)
             if (digit < 0) {
                 digit += 10
                 negativeMemory = -1
@@ -91,7 +96,7 @@ class UnsignedBigInteger(private val unsignedBigInteger: MutableList<Int>) : Com
             var memory = 0
             for (i in 1..bigger.size) {
                 val digit: Int = memory + bigger[bigger.size - i] * smaller[smaller.size - j]
-                memory = if (digitNumber(digit) > 1) digit / 10 else 0
+                memory = digit / 10
                 term.add(digit % 10)
             }
             if (memory != 0) term.add(memory)
